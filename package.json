@@ -1,0 +1,27 @@
+{
+  "name": "untitled",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node-cron": "^3.0.11",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "@dedust/apiary-v1": "^0.0.1",
+    "@dedust/sdk": "^0.8.7",
+    "@ton/core": "^0.56.3",
+    "@ton/crypto": "^3.2.0",
+    "@ton/ton": "^13.11.2",
+    "node-cron": "^3.0.3",
+    "tonweb": "^0.0.66",
+    "ts-node": "^10.9.2",
+    "tweetnacl": "^1.0.3"
+  }
+}
