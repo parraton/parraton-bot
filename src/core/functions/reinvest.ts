@@ -1,39 +1,49 @@
-import {tonClient} from "../../config/ton-client";
-import {environment} from "../../config/environment";
-import {fromNano, Sender, toNano} from "@ton/core";
-import {Asset, PoolType} from "@dedust/sdk";
-import {dedustFactory, vault} from "../../config/contracts";
-
-const nativeAsset = Asset.native();
-const jettonAsset = Asset.jetton(environment.TOKEN_ADDRESS);
-const assets: [Asset, Asset] = [nativeAsset, jettonAsset];
+import { tonClient } from "../../config/ton-client";
+import { Address, fromNano, OpenedContract, Sender, toNano } from "@ton/core";
+import { Asset, Pool } from "@dedust/sdk";
+import { Vault } from "../contracts/vault";
+import { TonJettonTonStrategy } from "../contracts/TonJettonTonStrategy";
 
 const MIN_BALANCE = toNano(1);
 
-const getVaultBalance = async () => {
-  const {last: {seqno}} = await tonClient.getLastBlock();
-  const {account: vaultAccountData} = await tonClient.getAccountLite(seqno, environment.VAULT_ADDRESS);
-  const atomicBalance  = vaultAccountData.balance.coins;
+const depositFee = toNano(0.3);
+const depositFwdFee = toNano(0.25);
+const transferFee = toNano(0.05);
+const reinvestFee = toNano(0.7);
 
-  return {atomicBalance: BigInt(atomicBalance)};
-}
+const getAccountBalance = async (accountAddress: Address) => {
+  const {
+    last: { seqno },
+  } = await tonClient.getLastBlock();
+  const { account: vaultAccountData } = await tonClient.getAccountLite(
+    seqno,
+    accountAddress
+  );
+  const atomicBalance = vaultAccountData.balance.coins;
 
-const depositFee= toNano(0.3);
-const depositFwdFee= toNano(0.25);
-const transferFee= toNano(0.05);
+  return BigInt(atomicBalance);
+};
 
-export const reinvest = async (sender: Sender) => {
-  const rawPool = await dedustFactory.getPool(PoolType.VOLATILE, assets)
+export const reinvest = async (
+  sender: Sender,
+  vault: OpenedContract<Vault>
+) => {
+  const { strategyAddress } = await vault.getVaultData();
+  const strategy = tonClient.open(
+    TonJettonTonStrategy.createFromAddress(strategyAddress)
+  );
+  const { poolAddress } = await strategy.getStrategyData();
 
-  const pool = tonClient.open(rawPool);
+  const nativeAsset = Asset.native();
 
-  const {atomicBalance: vaultBalance} = await getVaultBalance();
+  const pool = tonClient.open(Pool.createFromAddress(poolAddress));
+
+  const vaultBalance = await getAccountBalance(vault.address);
 
   const totalReward = vaultBalance - MIN_BALANCE;
   const tonToSell = totalReward / 2n;
 
-
-  if(tonToSell <= MIN_BALANCE) {
+  if (tonToSell <= MIN_BALANCE) {
     throw new Error(`Not enough balance(${fromNano(tonToSell)}) to reinvest`);
   }
 
@@ -42,11 +52,15 @@ export const reinvest = async (sender: Sender) => {
     amountIn: tonToSell,
   });
 
-  const estimatedDepositValues = await pool.getEstimateDepositOut([tonToSell, jettonOutData.amountOut]);
-  const [tonTargetBalance, jettonTargetBalance] = estimatedDepositValues.deposits;
+  const estimatedDepositValues = await pool.getEstimateDepositOut([
+    tonToSell,
+    jettonOutData.amountOut,
+  ]);
+  const [tonTargetBalance, jettonTargetBalance] =
+    estimatedDepositValues.deposits;
 
   await vault.sendReinvest(sender, {
-    value: toNano(0.7),
+    value: reinvestFee,
     totalReward,
     amountToSwap: tonToSell,
     limit: (jettonOutData.amountOut * 9n) / 10n,
@@ -57,4 +71,4 @@ export const reinvest = async (sender: Sender) => {
     depositFwdFee,
     transferFee,
   });
-}
+};
