@@ -6,11 +6,8 @@ import {Sender} from "@ton/core";
 import {claimDeDustDistributionRewards} from "../claim-de-dust-distribution-rewards";
 import {distributionPool} from "../../config/contracts";
 
-
 export const claimRewards = async (sender: Sender) => {
   let {dataUri} = await distributionPool.getRewardsData();
-
-  dataUri ??= 'ipfs://QmPgwC1hWJWwzNumzmExSZ449ozEgNYAU6Phy2JGVxkuZd'
 
   if(!dataUri) {
     throw new Error('Data URI is not defined');

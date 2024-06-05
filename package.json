@@ -16,9 +16,11 @@
   "dependencies": {
     "@dedust/apiary-v1": "^0.0.1",
     "@dedust/sdk": "^0.8.7",
+    "@pinata/sdk": "^2.1.0",
     "@ton/core": "^0.56.3",
     "@ton/crypto": "^3.2.0",
     "@ton/ton": "^13.11.2",
+    "dotenv": "^16.4.5",
     "node-cron": "^3.0.3",
     "tonweb": "^0.0.66",
     "ts-node": "^10.9.2",

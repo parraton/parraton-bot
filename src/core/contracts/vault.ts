@@ -1,42 +1,32 @@
 import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
 export type VaultConfig = {
+  distributionPoolAddress: Address;
   sharesTotalSupply: bigint;
   depositedLp: bigint;
-  jettonBalance: bigint;
-  jettonMasterAddress: Address;
-  poolType: number;
-  adminAddress: Address;
+  managementFeeRate: bigint;
+  managementFee: bigint;
   depositLpWalletAddress: Address;
-  jettonWalletAddress: Address;
-  jettonVaultAddress: Address;
-  poolAddress: Address;
-  distributionPoolAddress: Address;
-  nativeVaultAddress: Address;
+  adminAddress: Address;
+  managerAddress: Address;
+  strategyAddress: Address;
   sharesWalletCode: Cell;
   tempUpgrade: Cell;
 };
 
 export function vaultConfigToCell(config: VaultConfig): Cell {
   return beginCell()
+    .storeAddress(config.distributionPoolAddress)
     .storeCoins(config.sharesTotalSupply)
     .storeCoins(config.depositedLp)
-    .storeCoins(config.jettonBalance)
-    .storeAddress(config.jettonMasterAddress)
-    .storeUint(config.poolType, 1)
-    .storeAddress(config.adminAddress)
+    .storeCoins(config.managementFeeRate)
+    .storeCoins(config.managementFee)
+    .storeAddress(config.depositLpWalletAddress)
     .storeRef(
       beginCell()
-        .storeAddress(config.depositLpWalletAddress)
-        .storeAddress(config.jettonWalletAddress)
-        .storeAddress(config.jettonVaultAddress)
-        .endCell(),
-    )
-    .storeRef(
-      beginCell()
-        .storeAddress(config.poolAddress)
-        .storeAddress(config.distributionPoolAddress)
-        .storeAddress(config.nativeVaultAddress)
+        .storeAddress(config.adminAddress)
+        .storeAddress(config.managerAddress)
+        .storeAddress(config.strategyAddress)
         .endCell(),
     )
     .storeRef(config.sharesWalletCode)
@@ -52,8 +42,7 @@ export const Opcodes = {
   excesses: 0xd53276db,
   transfer: 0xf8a7ea5,
   set_deposit_lp_wallet_address: 0x7719b84f,
-  set_jetton_wallet_address: 0x288b5223,
-  set_token_1_wallet_address: 0xdf215700,
+  set_strategy_address: 0xa3d7611f,
   reinvest: 0x812d4e3,
 };
 
@@ -136,9 +125,13 @@ export class Vault implements Contract {
     via: Sender,
     opts: {
       value: bigint;
-      amount: bigint;
+      totalReward: bigint;
+      amountToSwap: bigint;
       limit: bigint;
       tonTargetBalance: bigint;
+      depositFee: bigint;
+      depositFwdFee: bigint;
+      transferFee: bigint;
       jettonTargetBalance: bigint;
       deadline: number;
       queryId?: number;
@@ -150,21 +143,29 @@ export class Vault implements Contract {
       body: beginCell()
         .storeUint(Opcodes.reinvest, 32)
         .storeUint(opts.queryId ?? 0, 64)
-        .storeCoins(opts.amount)
-        .storeCoins(opts.limit)
-        .storeUint(opts.deadline, 32)
-        .storeCoins(opts.tonTargetBalance)
-        .storeCoins(opts.jettonTargetBalance)
+        .storeCoins(opts.totalReward)
+        .storeRef(
+          beginCell()
+            .storeCoins(opts.amountToSwap)
+            .storeCoins(opts.limit)
+            .storeUint(opts.deadline, 32)
+            .storeCoins(opts.tonTargetBalance)
+            .storeCoins(opts.jettonTargetBalance)
+            .storeCoins(opts.depositFee)
+            .storeCoins(opts.depositFwdFee)
+            .storeCoins(opts.transferFee)
+            .endCell(),
+        )
         .endCell(),
     });
   }
 
-  async sendSetJettonWalletAddress(
+  async sendSetStrategyAddress(
     provider: ContractProvider,
     via: Sender,
     opts: {
       value: bigint;
-      walletAddress: Address;
+      strategyAddress: Address;
       queryId?: number;
     },
   ) {
@@ -172,29 +173,9 @@ export class Vault implements Contract {
       value: opts.value,
       sendMode: SendMode.PAY_GAS_SEPARATELY,
       body: beginCell()
-        .storeUint(Opcodes.set_jetton_wallet_address, 32)
+        .storeUint(Opcodes.set_strategy_address, 32)
         .storeUint(opts.queryId ?? 0, 64)
-        .storeAddress(opts.walletAddress)
-        .endCell(),
-    });
-  }
-
-  async sendSetToken1WalletAddress(
-    provider: ContractProvider,
-    via: Sender,
-    opts: {
-      value: bigint;
-      walletAddress: Address;
-      queryId?: number;
-    },
-  ) {
-    return provider.internal(via, {
-      value: opts.value,
-      sendMode: SendMode.PAY_GAS_SEPARATELY,
-      body: beginCell()
-        .storeUint(Opcodes.set_token_1_wallet_address, 32)
-        .storeUint(opts.queryId ?? 0, 64)
-        .storeAddress(opts.walletAddress)
+        .storeAddress(opts.strategyAddress)
         .endCell(),
     });
   }
@@ -202,18 +183,15 @@ export class Vault implements Contract {
   async getVaultData(provider: ContractProvider): Promise<VaultConfig> {
     const result = await provider.get('get_vault_data', []);
     return {
+      distributionPoolAddress: result.stack.readAddress(),
       sharesTotalSupply: result.stack.readBigNumber(),
       depositedLp: result.stack.readBigNumber(),
-      jettonBalance: result.stack.readBigNumber(),
-      jettonMasterAddress: result.stack.readAddress(),
-      poolType: result.stack.readNumber(),
-      adminAddress: result.stack.readAddress(),
+      managementFeeRate: result.stack.readBigNumber(),
+      managementFee: result.stack.readBigNumber(),
       depositLpWalletAddress: result.stack.readAddress(),
-      jettonWalletAddress: result.stack.readAddress(),
-      jettonVaultAddress: result.stack.readAddress(),
-      poolAddress: result.stack.readAddress(),
-      distributionPoolAddress: result.stack.readAddress(),
-      nativeVaultAddress: result.stack.readAddress(),
+      adminAddress: result.stack.readAddress(),
+      managerAddress: result.stack.readAddress(),
+      strategyAddress: result.stack.readAddress(),
       sharesWalletCode: result.stack.readCell(),
       tempUpgrade: result.stack.readCell(),
     };

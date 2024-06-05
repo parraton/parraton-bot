@@ -1,5 +1,5 @@
-import {Cell, Dictionary} from "@ton/core";
 import {environment} from "../config/environment";
+import {DictionaryUtils} from "./dictionary";
 
 export const fetchDictionaryFromIpfs = async (dataUri: string) => {
   const response = await fetch(environment.IPFS_GATEWAY + dataUri.replace('ipfs://', ''));
@@ -8,10 +8,5 @@ export const fetchDictionaryFromIpfs = async (dataUri: string) => {
 
   const buffer = Buffer.from(merkleTreeBOC);
 
-  return Cell.fromBoc(buffer)[0]
-    .beginParse()
-    .loadDictDirect(
-      Dictionary.Keys.Address(),
-      Dictionary.Values.BigVarUint(4),
-    );
+  return DictionaryUtils.fromBoc(buffer);
 }

@@ -10,7 +10,7 @@ export const getNewTxHash = async (
   prevTxHash: string,
 ): Promise<string> => {
   return await new Promise(async (resolve) => {
-    let newTxHash = '';
+    let newTxHash = prevTxHash;
 
     while (newTxHash == prevTxHash) {
       await sleep(5000);

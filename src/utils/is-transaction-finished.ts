@@ -13,7 +13,7 @@ export const isTransactionFinished = async (hash: string): Promise<boolean> => {
     return false;
   }
 
-  const {in_progress} = await response.json() as { in_progress: boolean };
+  const {in_progress}= await response.json() as { in_progress: boolean };
 
   return in_progress != undefined && !in_progress;
 }

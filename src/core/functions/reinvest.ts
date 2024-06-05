@@ -1,6 +1,6 @@
 import {tonClient} from "../../config/ton-client";
 import {environment} from "../../config/environment";
-import {Sender, toNano} from "@ton/core";
+import {fromNano, Sender, toNano} from "@ton/core";
 import {Asset, PoolType} from "@dedust/sdk";
 import {dedustFactory, vault} from "../../config/contracts";
 
@@ -18,6 +18,10 @@ const getVaultBalance = async () => {
   return {atomicBalance: BigInt(atomicBalance)};
 }
 
+const depositFee= toNano(0.3);
+const depositFwdFee= toNano(0.25);
+const transferFee= toNano(0.05);
+
 export const reinvest = async (sender: Sender) => {
   const rawPool = await dedustFactory.getPool(PoolType.VOLATILE, assets)
 
@@ -25,11 +29,12 @@ export const reinvest = async (sender: Sender) => {
 
   const {atomicBalance: vaultBalance} = await getVaultBalance();
 
-  const tonToSell = (vaultBalance - MIN_BALANCE) / 2n;
+  const totalReward = vaultBalance - MIN_BALANCE;
+  const tonToSell = totalReward / 2n;
+
 
   if(tonToSell <= MIN_BALANCE) {
-    console.log('Vault balance is too low to reinvest');
-    return;
+    throw new Error(`Not enough balance(${fromNano(tonToSell)}) to reinvest`);
   }
 
   const jettonOutData = await pool.getEstimatedSwapOut({
@@ -41,11 +46,15 @@ export const reinvest = async (sender: Sender) => {
   const [tonTargetBalance, jettonTargetBalance] = estimatedDepositValues.deposits;
 
   await vault.sendReinvest(sender, {
-    value: toNano(1),
-    amount: tonToSell,
+    value: toNano(0.7),
+    totalReward,
+    amountToSwap: tonToSell,
     limit: (jettonOutData.amountOut * 9n) / 10n,
     deadline: Math.floor(Date.now() / 1000 + 86400), // Added 1 day in milliseconds to the current timestamp
     tonTargetBalance,
-    jettonTargetBalance
+    jettonTargetBalance,
+    depositFee,
+    depositFwdFee,
+    transferFee,
   });
 }
