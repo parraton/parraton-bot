@@ -1,6 +1,9 @@
+import { addresses } from "./config/contracts-config";
 import { mockDedustDistribution } from "./mock-dedust-distribution";
 
 import { sendReinvest } from "./send-reinvest";
+import { getAllJettonHolders } from "./utils/get-jetton-holders";
+import { vaultExtraRewardsDistribution } from "./vault-extra-rewards-distribution";
 // import { vault } from "./config/contracts";
 // import { TonJettonTonStrategy } from "./core/contracts/TonJettonTonStrategy";
 // import { usdtVault } from "./config/contracts-config";
@@ -16,8 +19,10 @@ const period = "0 0 * * *";
 
 void (async () => {
   try {
+    // await vaultExtraRewardsDistribution();
     // await mockDedustDistribution();
     //
+    // console.log(await getAllJettonHolders(addresses.vaults[0].vault));
     await sendReinvest();
     //
     // const data = await  vault.getVaultData();

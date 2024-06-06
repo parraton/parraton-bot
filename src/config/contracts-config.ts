@@ -1,16 +1,16 @@
 export const usdtVault = {
-  vault: "EQDGv6joUI2UROu2J2NBPZlVi0cII5nZ9WX6_S1gSgkwiG-l",
-  extraDistributionPool: "EQCgguh-Jl2aD905sbxc_KrZPx2iJ7BuEqC7iQ4rkAQmUxCq",
+  vault: "EQDCTVjdnkcr5yIyBJBKLdGtiSuDYYhZCQD6ZwqSPWeMP4Mi",
+  extraDistributionPool: "EQBDJhFGiwHf17N4KCDgDS8GkGDeNadWzg_Ek23DN7WNAuVN",
 };
 
 const scaleVault = {
-  vault: "EQBg6jLj_pzpTD4fFDZcE8mSJ74I7-6F8LDMeDxUPBuCnIOB",
-  extraDistributionPool: "EQCBWlGoVd8w4riZ6dLqqKT1GqgM3C-PwI_54XHLL_sRPNM-",
+  vault: "EQCx3v_v6OTg58BDMIBIREewZ1rfFjyzbgEivXbpZGN9J6_P",
+  extraDistributionPool: "EQCG-vwexBCTFh17mU2ffwRusqkv2PbqQa1mhZt5NUtMhCZt",
 };
 
 const notVault = {
-  vault: "EQAl2X9xhZzhRuIEEBK4CBQLp6pYuDUM-5FougbWHdRsK7RH",
-  extraDistributionPool: "EQCSyh3gs548BKzn62dIZMVTl6GkuqdSkaY_OeyUzpfqSaHZ",
+  vault: "EQDzgLurE_klqVvHAdyZ1hBGQpgHCiDFpRg4bnu_-DUyxX4g",
+  extraDistributionPool: "EQA-Nx5mMcP8_BXlh6qJ_oLsFPguCsoa0Pn4Nbg6cI3SNE-8",
 };
 
 export const addresses = {
@@ -19,6 +19,6 @@ export const addresses = {
   extraRewardsDistributionFactory:
     "EQDmtWKElPJLGJfjlN060ztD6-CwM_8HFNIFH507qiza-x6H",
   vaultFactory: "EQAYiDrQ9_veYdJZGbbHF4HSUoT3YvJ5xNHmMxrJRMtwEP7s",
-  vaults: [usdtVault],
-  // vaults: [usdtVault, scaleVault, notVault],
+  // vaults: [usdtVault],
+  vaults: [usdtVault, scaleVault, notVault],
 } as const;

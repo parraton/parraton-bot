@@ -15,6 +15,9 @@ import path from "path";
 import { PinataPinOptions } from "@pinata/sdk/src/commands/pinning/pinFileToIPFS";
 import { DictionaryUtils } from "../../utils/dictionary";
 import { tonClient } from "../../config/ton-client";
+import { getAllJettonHolders } from "../../utils/get-jetton-holders";
+import { fetchDictionaryFromIpfs } from "../../utils/fetch-dictionary-from-ipfs";
+import { Vault } from "../contracts";
 
 const pinata = new pinataSDK({ pinataJWTKey: environment.PINATA_JWT });
 
@@ -39,7 +42,7 @@ const uploadToIpfs = async (dict: Dictionary<Address, bigint>) => {
   return `ipfs://${IpfsHash}`;
 };
 
-export async function distributeDeDustDistributionRewards(
+export async function distributeRewards(
   admin: Sender,
   rewardsDictionary: Dictionary<Address, bigint>,
   distributionPool: OpenedContract<DistributionPool>
@@ -54,13 +57,39 @@ export async function distributeDeDustDistributionRewards(
   });
 }
 
-export const distributeRewards = async (
-  sender: Sender,
+export const prepareExtraRewards = async (
   vaultAddress: Address,
   newRewards: bigint,
   distributionPool: OpenedContract<DistributionPool>
 ) => {
-  // read rewards from distribution pool & add new rewards
+  let rewardsDictionary = DistributionPool.createRewardsDictionary();
+
+  let { dataUri } = await distributionPool.getRewardsData();
+  if (dataUri) {
+    rewardsDictionary = await fetchDictionaryFromIpfs(dataUri);
+  }
+
+  const vault = tonClient.open(Vault.createFromAddress(vaultAddress));
+  const { sharesTotalSupply } = await vault.getVaultData();
+  const holders = await getAllJettonHolders(vaultAddress.toString());
+  holders.forEach((holder) => {
+    const newReward =
+      (BigInt(holder.balance) * BigInt(newRewards)) / BigInt(sharesTotalSupply);
+    const prevReward =
+      rewardsDictionary.get(Address.parse(holder.owner.address)) || 0n;
+    rewardsDictionary.set(
+      Address.parse(holder.owner.address),
+      prevReward + newReward
+    );
+  });
+  return rewardsDictionary;
+};
+
+export const prepareDedustMockRewards = async (
+  vaultAddress: Address,
+  newRewards: bigint,
+  distributionPool: OpenedContract<DistributionPool>
+) => {
   const accountAddress = await distributionPool.getAccountAddress(vaultAddress);
   const distributionAccount = tonClient.open(
     DistributionAccount.createFromAddress(accountAddress)
@@ -74,12 +103,5 @@ export const distributeRewards = async (
 
   const rewardsDictionary = DistributionPool.createRewardsDictionary();
   rewardsDictionary.set(vaultAddress, reward);
-
-  await distributeDeDustDistributionRewards(
-    sender,
-    rewardsDictionary,
-    distributionPool
-  );
-
-  return newRewards;
+  return rewardsDictionary;
 };
