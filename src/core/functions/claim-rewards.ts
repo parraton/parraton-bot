@@ -1,16 +1,17 @@
-import {DistributionPool} from "@dedust/apiary-v1";
-import {environment} from "../../config/environment";
-import {tonClient} from "../../config/ton-client";
-import {fetchDictionaryFromIpfs} from "../../utils/fetch-dictionary-from-ipfs";
-import {Sender} from "@ton/core";
-import {claimDeDustDistributionRewards} from "../claim-de-dust-distribution-rewards";
-import {distributionPool} from "../../config/contracts";
+import { DistributionPool } from "@dedust/apiary-v1";
+import { fetchDictionaryFromIpfs } from "../../utils/fetch-dictionary-from-ipfs";
+import { Address, OpenedContract, Sender } from "@ton/core";
+import { claimDeDustDistributionRewards } from "../claim-de-dust-distribution-rewards";
 
-export const claimRewards = async (sender: Sender) => {
-  let {dataUri} = await distributionPool.getRewardsData();
+export const claimRewards = async (
+  sender: Sender,
+  distributionPool: OpenedContract<DistributionPool>,
+  userAddress: Address
+) => {
+  let { dataUri } = await distributionPool.getRewardsData();
 
-  if(!dataUri) {
-    throw new Error('Data URI is not defined');
+  if (!dataUri) {
+    throw new Error("Data URI is not defined");
   }
 
   const rewardsDictionary = await fetchDictionaryFromIpfs(dataUri);
@@ -19,6 +20,6 @@ export const claimRewards = async (sender: Sender) => {
     sender,
     rewardsDictionary,
     distributionPool,
-    environment.VAULT_ADDRESS
+    userAddress
   );
-}
+};
