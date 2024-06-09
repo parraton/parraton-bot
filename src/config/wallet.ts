@@ -2,8 +2,8 @@ import { WalletContractV3R2 } from '@ton/ton';
 import { KeyPair, mnemonicToSeed } from '@ton/crypto';
 import { environment } from './environment';
 import nacl from 'tweetnacl';
-import { tonClient } from './ton-client';
 import {OpenedContract, Sender} from "@ton/core";
+import {tonClientPromise} from "./ton-client";
 
 function normalizeMnemonic(src: string[]) {
   return src.map((v) => v.toLowerCase().trim());
@@ -34,6 +34,7 @@ const getWallet = async (num?: number): Promise<WalletSender> => {
   const seed = `${0}${num ?? 0}`;
 
   const keys = await mnemonicToPrivateKey(mnemonicArray, seed);
+  const tonClient = await tonClientPromise;
 
   const wallet = tonClient.open(
     WalletContractV3R2.create({

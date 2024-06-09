@@ -7,15 +7,15 @@ import {
 } from "./core/functions/distribute-dedust-distribution-rewards";
 import { environment } from "./config/environment";
 import { addresses } from "./config/contracts-config";
-import { tonClient } from "./config/ton-client";
 import { Vault } from "./core/contracts/vault";
 import { Address, toNano } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
+import {tonClientPromise} from "./config/ton-client";
 
 export const vaultExtraRewardsDistribution = async () => {
   const { wallet, sender: governor } = await vaultGovernorWalletPromise;
   const address = wallet.address.toString();
-
+  const tonClient = await tonClientPromise;
   for (const vaultData of Object.values(addresses.vaults)) {
     const distributionPool = tonClient.open(
       DistributionPool.createFromAddress(
@@ -38,7 +38,7 @@ export const vaultExtraRewardsDistribution = async () => {
     });
 
     console.log(
-      `Extra rewards distribution hash: ${hash}. Link:${environment.TONVIEWER_URL}/transaction/${hash}`
+      `Extra rewards distribution for ${vaultData.vault} hash: ${hash}. Link:${environment.TONVIEWER_URL}/transaction/${hash}`
     );
 
     const fee = toNano(0.05);
@@ -50,7 +50,7 @@ export const vaultExtraRewardsDistribution = async () => {
     );
 
     console.log(
-      `Send extra rewards hash: ${sendHash}. Link:${environment.TONVIEWER_URL}/transaction/${sendHash}`
+      `Send extra rewards for ${vaultData.vault} hash: ${sendHash}. Link:${environment.TONVIEWER_URL}/transaction/${sendHash}`
     );
   }
 };

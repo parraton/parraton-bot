@@ -6,15 +6,15 @@ import {
 } from "./core/functions/distribute-dedust-distribution-rewards";
 import { environment } from "./config/environment";
 import { addresses } from "./config/contracts-config";
-import { tonClient } from "./config/ton-client";
 import { Vault } from "./core/contracts/vault";
 import { Address, toNano } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
+import {tonClientPromise} from "./config/ton-client";
 
 export const mockDedustDistribution = async () => {
   const { wallet, sender: governor } = await dedustGovernorWalletPromise;
   const address = wallet.address.toString();
-
+  const tonClient = await tonClientPromise;
   for (const vaultData of Object.values(addresses.vaults)) {
     const vault = tonClient.open(
       Vault.createFromAddress(Address.parse(vaultData.vault))

@@ -1,8 +1,8 @@
-import { tonClient } from "../../config/ton-client";
 import { Address, fromNano, OpenedContract, Sender, toNano } from "@ton/core";
 import { Asset, Pool } from "@dedust/sdk";
 import { Vault } from "../contracts/vault";
 import { TonJettonTonStrategy } from "../contracts/TonJettonTonStrategy";
+import {tonClientPromise} from "../../config/ton-client";
 
 const MIN_BALANCE = toNano(1);
 
@@ -12,6 +12,7 @@ const transferFee = toNano(0.05);
 const reinvestFee = toNano(0.7);
 
 const getAccountBalance = async (accountAddress: Address) => {
+  const tonClient = await tonClientPromise;
   const {
     last: { seqno },
   } = await tonClient.getLastBlock();
@@ -28,6 +29,7 @@ export const reinvest = async (
   sender: Sender,
   vault: OpenedContract<Vault>
 ) => {
+  const tonClient = await tonClientPromise;
   const { strategyAddress } = await vault.getVaultData();
   const strategy = tonClient.open(
     TonJettonTonStrategy.createFromAddress(strategyAddress)

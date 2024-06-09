@@ -4,7 +4,7 @@ dotenv.config();
 const { PINATA_JWT, TONCENTER_API_KEY, SEED_PHRASE } = process.env;
 
 export const environment = {
-  TON_CLIENT_ENDPOINT: "https://sandbox-v4.tonhubapi.com",
+  TON_CLIENT_ENDPOINT: "https://testnet-v4.tonhubapi.com",
   // SEED_PHRASE: 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat',
   SEED_PHRASE: SEED_PHRASE || "",
   TONCENTER_API_KEY,

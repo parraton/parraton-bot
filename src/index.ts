@@ -19,11 +19,11 @@ const period = "0 0 * * *";
 
 void (async () => {
   try {
-    // await vaultExtraRewardsDistribution();
-    // await mockDedustDistribution();
+    await mockDedustDistribution();
     //
     // console.log(await getAllJettonHolders(addresses.vaults[0].vault));
     await sendReinvest();
+    await vaultExtraRewardsDistribution();
     //
     // const data = await  vault.getVaultData();
 

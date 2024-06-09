@@ -1,4 +1,4 @@
-export const usdtVault = {
+const usdtVault = {
   vault: "EQDCTVjdnkcr5yIyBJBKLdGtiSuDYYhZCQD6ZwqSPWeMP4Mi",
   extraDistributionPool: "EQBDJhFGiwHf17N4KCDgDS8GkGDeNadWzg_Ek23DN7WNAuVN",
 };
@@ -19,6 +19,6 @@ export const addresses = {
   extraRewardsDistributionFactory:
     "EQDmtWKElPJLGJfjlN060ztD6-CwM_8HFNIFH507qiza-x6H",
   vaultFactory: "EQAYiDrQ9_veYdJZGbbHF4HSUoT3YvJ5xNHmMxrJRMtwEP7s",
-  // vaults: [usdtVault],
-  vaults: [usdtVault, scaleVault, notVault],
+  vaults: [scaleVault],
+  // vaults: [usdtVault, scaleVault, notVault],
 } as const;
