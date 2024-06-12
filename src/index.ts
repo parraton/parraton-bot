@@ -1,42 +1,27 @@
-import { addresses } from "./config/contracts-config";
-import { mockDedustDistribution } from "./mock-dedust-distribution";
+import {schedule} from "node-cron";
 
-import { sendReinvest } from "./send-reinvest";
-import { getAllJettonHolders } from "./utils/get-jetton-holders";
-import { vaultExtraRewardsDistribution } from "./vault-extra-rewards-distribution";
-// import { vault } from "./config/contracts";
-// import { TonJettonTonStrategy } from "./core/contracts/TonJettonTonStrategy";
-// import { usdtVault } from "./config/contracts-config";
-// import { Address } from "@ton/core";
-// import { tonClient } from "./config/ton-client";
+import {mockDedustDistribution} from "./mock-dedust-distribution";
 
-const period = "0 0 * * *";
+import {sendReinvest} from "./send-reinvest";
+import {vaultExtraRewardsDistribution} from "./vault-extra-rewards-distribution";
 
-// schedule(period, async () => {
-//
-//
-// });
+const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
+const vaultExtraRewardsDistributionSchedule = "0 1 * * *"; // every day at 01:00
 
-// void (async () => {
-//   try {
-//     await mockDedustDistribution();
-//     //
-//     // console.log(await getAllJettonHolders(addresses.vaults[0].vault));
-//     await sendReinvest();
-//     await vaultExtraRewardsDistribution();
-//     //
-//     // const data = await  vault.getVaultData();
-//
-//     // console.log({data})
-//
-//     // const strategy = tonClient.open(TonJettonTonStrategy.createFromAddress(data.strategyAddress));
-//
-//     // const _data = await strategy.getStrategyData();
-//
-//     // console.log({_data})
-//   } catch (e) {
-//     console.error(e);
-//   }
-// })();
+schedule(dedustReinvestSchedule, async () => {
+  try {
+    await mockDedustDistribution();
 
-console.log('Hello, World!')
+    await sendReinvest();
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+schedule(vaultExtraRewardsDistributionSchedule, async () => {
+  try {
+    await vaultExtraRewardsDistribution();
+  } catch (e) {
+    console.error(e);
+  }
+})

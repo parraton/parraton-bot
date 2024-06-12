@@ -4,7 +4,7 @@ import { reinvest } from "./core/functions/reinvest";
 import { claimRewards } from "./core/functions/claim-rewards";
 import { environment } from "./config/environment";
 import { addresses } from "./config/contracts-config";
-import { Vault } from "./core/contracts/vault";
+import { Vault } from "./core/contracts";
 import { Address } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
 import {tonClientPromise} from "./config/ton-client";
