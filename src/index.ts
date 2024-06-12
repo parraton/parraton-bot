@@ -17,24 +17,26 @@ const period = "0 0 * * *";
 //
 // });
 
-void (async () => {
-  try {
-    await mockDedustDistribution();
-    //
-    // console.log(await getAllJettonHolders(addresses.vaults[0].vault));
-    await sendReinvest();
-    await vaultExtraRewardsDistribution();
-    //
-    // const data = await  vault.getVaultData();
+// void (async () => {
+//   try {
+//     await mockDedustDistribution();
+//     //
+//     // console.log(await getAllJettonHolders(addresses.vaults[0].vault));
+//     await sendReinvest();
+//     await vaultExtraRewardsDistribution();
+//     //
+//     // const data = await  vault.getVaultData();
+//
+//     // console.log({data})
+//
+//     // const strategy = tonClient.open(TonJettonTonStrategy.createFromAddress(data.strategyAddress));
+//
+//     // const _data = await strategy.getStrategyData();
+//
+//     // console.log({_data})
+//   } catch (e) {
+//     console.error(e);
+//   }
+// })();
 
-    // console.log({data})
-
-    // const strategy = tonClient.open(TonJettonTonStrategy.createFromAddress(data.strategyAddress));
-
-    // const _data = await strategy.getStrategyData();
-
-    // console.log({_data})
-  } catch (e) {
-    console.error(e);
-  }
-})();
+console.log('Hello, World!')
