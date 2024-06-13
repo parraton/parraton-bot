@@ -1,13 +1,4 @@
-import {
-  Address,
-  beginCell,
-  Cell,
-  Contract,
-  contractAddress,
-  ContractProvider,
-  Sender,
-  SendMode,
-} from '@ton/core';
+import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
 export type SharesWalletConfig = {
   balance: bigint;
@@ -26,9 +17,9 @@ export function sharesWalletConfigToCell(config: SharesWalletConfig): Cell {
 }
 
 export const Opcodes = {
-  transfer: 0xf_8a_7e_a5,
-  internal_transfer: 0x17_8d_45_19,
-  burn: 0x59_5f_07_bc,
+  transfer: 0xf8a7ea5,
+  internal_transfer: 0x178d4519,
+  burn: 0x595f07bc,
 };
 
 export class SharesWallet implements Contract {
@@ -112,7 +103,6 @@ export class SharesWallet implements Contract {
       body,
     });
   }
-
   async getWalletData(provider: ContractProvider): Promise<SharesWalletConfig> {
     const result = await provider.get('get_wallet_data', []);
     return {

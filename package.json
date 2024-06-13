@@ -3,7 +3,8 @@
   "description": "Distribution bot for Parroton",
   "version": "1.0.0",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "check": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.11",

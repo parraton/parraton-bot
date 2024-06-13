@@ -1,22 +1,13 @@
-import {
-  Address,
-  beginCell,
-  Cell,
-  Contract,
-  contractAddress,
-  ContractProvider,
-  Sender,
-  SendMode,
-} from '@ton/core';
+import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from '@ton/core';
 
-export type TestJettonMinterConfig = {
+export type JettonMinterConfig = {
   totalSupply: bigint;
   adminAddress: Address;
   content: Cell;
   jettonWalletCode: Cell;
 };
 
-export type TestJettonMinterData = {
+export type JettonMinterData = {
   totalSupply: bigint;
   mintable: boolean;
   adminAddress: Address;
@@ -24,8 +15,7 @@ export type TestJettonMinterData = {
   jettonWalletCode: Cell;
 };
 
-export function testJettonMinterConfigToCell(config: TestJettonMinterConfig): Cell {
-  console.log(config.totalSupply);
+export function testJettonMinterConfigToCell(config: JettonMinterConfig): Cell {
   return beginCell()
     .storeCoins(config.totalSupply)
     .storeAddress(config.adminAddress)
@@ -35,7 +25,7 @@ export function testJettonMinterConfigToCell(config: TestJettonMinterConfig): Ce
 }
 
 export const Opcodes = {
-  mint: 0x3_18_f3_61,
+  mint: 0x318f361,
 };
 
 export class JettonMinter implements Contract {
@@ -48,7 +38,7 @@ export class JettonMinter implements Contract {
     return new JettonMinter(address);
   }
 
-  static createFromConfig(config: TestJettonMinterConfig, code: Cell, workchain = 0) {
+  static createFromConfig(config: JettonMinterConfig, code: Cell, workchain = 0) {
     const data = testJettonMinterConfigToCell(config);
     const init = { code, data };
     return new JettonMinter(contractAddress(workchain, init), init);
@@ -84,7 +74,7 @@ export class JettonMinter implements Contract {
     });
   }
 
-  async getJettonData(provider: ContractProvider): Promise<TestJettonMinterData> {
+  async getJettonData(provider: ContractProvider): Promise<JettonMinterData> {
     const result = await provider.get('get_jetton_data', []);
     return {
       totalSupply: result.stack.readBigNumber(),
