@@ -19,5 +19,6 @@ export const addresses = {
   extraRewardsDistributionFactory:
     "EQDmtWKElPJLGJfjlN060ztD6-CwM_8HFNIFH507qiza-x6H",
   vaultFactory: "EQC3Mcj8A7V3zrmPnOUM3ylpty8Tq2kVIhBWj4cs2rAHnHRK",
-  vaults: [usdtVault, scaleVault, notVault],
+  vaults: [usdtVault],
+  // vaults: [usdtVault, scaleVault, notVault],
 } as const;

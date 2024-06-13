@@ -1,22 +1,28 @@
-import {schedule} from "node-cron";
+import { schedule } from "node-cron";
 
-import {mockDedustDistribution} from "./mock-dedust-distribution";
+import { mockDedustDistribution } from "./mock-dedust-distribution";
 
-import {sendReinvest} from "./send-reinvest";
-import {vaultExtraRewardsDistribution} from "./vault-extra-rewards-distribution";
+import { sendReinvest } from "./send-reinvest";
+import { vaultExtraRewardsDistribution } from "./vault-extra-rewards-distribution";
 
 const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
 const vaultExtraRewardsDistributionSchedule = "0 1 * * *"; // every day at 01:00
 
-schedule(dedustReinvestSchedule, async () => {
-  try {
-    await mockDedustDistribution();
+schedule(
+  dedustReinvestSchedule,
+  async () => {
+    try {
+      await mockDedustDistribution();
 
-    await sendReinvest();
-  } catch (e) {
-    console.error(e);
+      await sendReinvest();
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  {
+    runOnInit: true,
   }
-});
+);
 
 schedule(vaultExtraRewardsDistributionSchedule, async () => {
   try {
@@ -24,4 +30,4 @@ schedule(vaultExtraRewardsDistributionSchedule, async () => {
   } catch (e) {
     console.error(e);
   }
-})
+});
