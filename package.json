@@ -1,14 +1,10 @@
 {
-  "name": "untitled",
+  "name": "parroton-bot",
+  "description": "Distribution bot for Parroton",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
     "start": "ts-node src/index.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "devDependencies": {
     "@types/node-cron": "^3.0.11",
     "typescript": "^5.4.5"
