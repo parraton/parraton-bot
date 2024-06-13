@@ -15,7 +15,7 @@ export const mockDedustDistribution = async () => {
   const { wallet, sender: governor } = await dedustGovernorWalletPromise;
   const address = wallet.address.toString();
   const tonClient = await tonClientPromise;
-  for (const vaultData of Object.values(addresses.vaults)) {
+  for (const vaultData of addresses.vaults) {
     const vault = tonClient.open(
       Vault.createFromAddress(Address.parse(vaultData.vault))
     );
