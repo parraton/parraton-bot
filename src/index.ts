@@ -8,21 +8,15 @@ import { vaultExtraRewardsDistribution } from "./vault-extra-rewards-distributio
 const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
 const vaultExtraRewardsDistributionSchedule = "0 1 * * *"; // every day at 01:00
 
-schedule(
-  dedustReinvestSchedule,
-  async () => {
-    try {
-      await mockDedustDistribution();
+schedule(dedustReinvestSchedule, async () => {
+  try {
+    await mockDedustDistribution();
 
-      await sendReinvest();
-    } catch (e) {
-      console.error(e);
-    }
-  },
-  {
-    runOnInit: true,
+    await sendReinvest();
+  } catch (e) {
+    console.error(e);
   }
-);
+});
 
 schedule(vaultExtraRewardsDistributionSchedule, async () => {
   try {
