@@ -2,7 +2,7 @@ import { Address, fromNano, OpenedContract, Sender, toNano } from "@ton/core";
 import { Asset, Pool } from "@dedust/sdk";
 import { Vault } from "../contracts/vault";
 import { TonJettonTonStrategy } from "../contracts/TonJettonTonStrategy";
-import {tonClientPromise} from "../../config/ton-client";
+import { tonClientPromise } from "../../config/ton-client";
 
 const MIN_BALANCE = toNano(1);
 
@@ -25,6 +25,17 @@ const getAccountBalance = async (accountAddress: Address) => {
   return BigInt(atomicBalance);
 };
 
+export const isReinvestNeeded = async (vaultAddress: Address) => {
+  const vaultBalance = await getAccountBalance(vaultAddress);
+
+  const totalReward = vaultBalance - MIN_BALANCE;
+
+  if (totalReward > MIN_BALANCE / 2n) {
+    return true;
+  }
+  return false;
+};
+
 export const reinvest = async (
   sender: Sender,
   vault: OpenedContract<Vault>
@@ -44,10 +55,6 @@ export const reinvest = async (
 
   const totalReward = vaultBalance - MIN_BALANCE;
   const tonToSell = totalReward / 2n;
-
-  if (tonToSell <= MIN_BALANCE) {
-    throw new Error(`Not enough balance(${fromNano(tonToSell)}) to reinvest`);
-  }
 
   const jettonOutData = await pool.getEstimatedSwapOut({
     assetIn: nativeAsset,

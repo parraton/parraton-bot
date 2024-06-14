@@ -9,7 +9,7 @@ import { addresses } from "./config/contracts-config";
 import { Vault } from "./core/contracts";
 import { Address, toNano } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
-import {tonClientPromise} from "./config/ton-client";
+import { tonClientPromise } from "./config/ton-client";
 
 export const mockDedustDistribution = async () => {
   const { wallet, sender: governor } = await dedustGovernorWalletPromise;
@@ -24,7 +24,7 @@ export const mockDedustDistribution = async () => {
       DistributionPool.createFromAddress(data.distributionPoolAddress)
     );
     const distributionPoolData = await distributionPool.getPoolExtraData();
-    let rewards = toNano(2);
+    let rewards = toNano(1.5);
 
     const { hash } = await wait(address, async () => {
       const rewardsDictionary = await prepareDedustMockRewards(

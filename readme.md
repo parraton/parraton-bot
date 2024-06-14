@@ -6,7 +6,7 @@ Parroton consists of these components:
 
 **[Contract](https://github.com/KStasi/parroton-core)**: The smart contract code that is running on-chain.
 
-**[Webapp](https://github.com/Digberi/parroton)**: The web application that helps users with deposits and withdrawals.
+**[Webapp](https://github.com/Digberi/parroton-web)**: The web application that helps users with deposits and withdrawals.
 
 **Restaker**: The off-chain bot that restakes rewards to generate more yield for depositors. The code is available here on this repository.
 
