@@ -1,8 +1,12 @@
-import { Address, fromNano, OpenedContract, Sender, toNano } from "@ton/core";
-import { Asset, Pool } from "@dedust/sdk";
-import { Vault } from "../contracts/vault";
-import { TonJettonTonStrategy } from "../contracts/TonJettonTonStrategy";
-import { tonClientPromise } from "../../config/ton-client";
+import {Address, OpenedContract, Sender, toNano} from "@ton/core";
+import {Asset} from "@dedust/sdk";
+import {TonJettonTonStrategy} from "../contracts/TonJettonTonStrategy";
+import {tonClientPromise} from "../../config/ton-client";
+import {getAccountBalance} from "../../utils/get-account-balance";
+import {getDeadlineInDay} from "../../utils/get-deadline-in-day";
+import {MegaVault} from "../mega/mega-vault";
+import {MegaJettonRoot} from "../mega/mega-jetton-root";
+import {MegaPool} from "../mega/mega-pool";
 
 const MIN_BALANCE = toNano(1);
 
@@ -11,69 +15,119 @@ const depositFwdFee = toNano(0.25);
 const transferFee = toNano(0.05);
 const reinvestFee = toNano(0.7);
 
-const getAccountBalance = async (accountAddress: Address) => {
-  const tonClient = await tonClientPromise;
-  const {
-    last: { seqno },
-  } = await tonClient.getLastBlock();
-  const { account: vaultAccountData } = await tonClient.getAccountLite(
-    seqno,
-    accountAddress
-  );
-  const atomicBalance = vaultAccountData.balance.coins;
-
-  return BigInt(atomicBalance);
-};
-
 export const isReinvestNeeded = async (vaultAddress: Address) => {
   const vaultBalance = await getAccountBalance(vaultAddress);
 
   const totalReward = vaultBalance - MIN_BALANCE;
 
-  if (totalReward > MIN_BALANCE / 2n) {
-    return true;
-  }
-  return false;
+  return totalReward > MIN_BALANCE / 2n;
 };
 
-export const reinvest = async (
-  sender: Sender,
-  vault: OpenedContract<Vault>
-) => {
-  const tonClient = await tonClientPromise;
-  const { strategyAddress } = await vault.getVaultData();
-  const strategy = tonClient.open(
-    TonJettonTonStrategy.createFromAddress(strategyAddress)
-  );
-  const { poolAddress } = await strategy.getStrategyData();
+const bigIntMax = (...args: Array<bigint>) => args.reduce((m, e) => e > m ? e : m);
+
+const applySlippage = (amount: bigint, slippageInPercents = 3n) => (amount * (100n - slippageInPercents)) / 100n;
+
+let TestBrake = true;
+
+const getSwapAmounts = () => {
+
+}
+
+const getAmountsForOperations = async (strategy: OpenedContract<TonJettonTonStrategy>, totalReward: bigint) => {
+  const {poolAddress, jettonMasterAddress: jettonAddress} = await strategy.getStrategyData();
+
+  const pool = await MegaPool.open(poolAddress)
 
   const nativeAsset = Asset.native();
 
-  const pool = tonClient.open(Pool.createFromAddress(poolAddress));
+  const jettonRoot = await MegaJettonRoot.open(jettonAddress);
+  const jettonAsset = jettonRoot.getAsset();
 
-  const vaultBalance = await getAccountBalance(vault.address);
+  console.log({totalReward})
 
-  const totalReward = vaultBalance - MIN_BALANCE;
-  const tonToSell = totalReward / 2n;
+  const balance = await jettonRoot.getUserBalance(strategy.address);
 
-  const jettonOutData = await pool.getEstimatedSwapOut({
-    assetIn: nativeAsset,
-    amountIn: tonToSell,
-  });
+  console.log({balance})
+  const {amountOut: tonEquivalent} = await pool.getEstimatedSwapOut({
+    assetIn: jettonAsset,
+    amountIn: balance,
+  })
+  console.log({tonEquivalent})
 
-  const estimatedDepositValues = await pool.getEstimateDepositOut([
-    tonToSell,
-    jettonOutData.amountOut,
+  const tonToDeposit = (totalReward + tonEquivalent) / 2n
+  const tonToSwap = bigIntMax(tonToDeposit - tonEquivalent, 100n);
+
+  console.log({tonToDeposit, tonToSwap})
+
+  let amountOut = 0n;
+
+  if (tonToSwap > 0n) {
+    const eso = await pool.getEstimatedSwapOut({
+      assetIn: nativeAsset,
+      amountIn: tonToSwap,
+    })
+
+    amountOut = eso.amountOut;
+  }
+
+  console.log({amountOut})
+
+  const limit = TestBrake ? applySlippage(amountOut) : applySlippage(amountOut, -5n);
+
+  TestBrake = !TestBrake;
+
+  const {deposits} = await pool.getEstimateDepositOut([
+    tonToDeposit,
+    limit + balance,
   ]);
-  const [tonTargetBalance, jettonTargetBalance] =
-    estimatedDepositValues.deposits;
+
+  const [tonTargetBalance, jettonTargetBalance] = deposits;
+
+  console.log({
+    limit,
+    tonTargetBalance,
+    jettonTargetBalance
+  })
+
+  return {
+    limit,
+    tonToSwap,
+    tonTargetBalance,
+    jettonTargetBalance
+  }
+}
+
+const excludeFee = (amount: bigint, fee: bigint) => amount * (10_000n - fee) / 10_000n
+
+export const reinvest = async (
+  sender: Sender,
+  vault: OpenedContract<MegaVault>
+) => {
+  const tonClient = await tonClientPromise;
+  const {managementFeeRate} = await vault.getVaultData();
+  const strategy = tonClient.open(await vault.getStrategy());
+
+  const vaultBalance = await vault.getAccountBalance();
+  const foo = excludeFee(vaultBalance, managementFeeRate); //TON
+  const totalReward = foo - MIN_BALANCE; //TON
+
+  const {
+    limit,
+    tonToSwap,
+    tonTargetBalance,
+    jettonTargetBalance
+  } = await getAmountsForOperations(strategy, totalReward);
+
+  if (totalReward < tonTargetBalance + tonToSwap) {
+    throw new Error("Not enough rewards to reinvest");
+  }
 
   await vault.sendReinvest(sender, {
     value: reinvestFee,
     totalReward,
-    amountToSwap: tonToSell,
-    limit: (jettonOutData.amountOut * 9n) / 10n,
-    deadline: Math.floor(Date.now() / 1000 + 86400), // Added 1 day in milliseconds to the current timestamp
+    amountToSwap: tonToSwap,
+    limit,
+    deadline: getDeadlineInDay(),
     tonTargetBalance,
     jettonTargetBalance,
     depositFee,

@@ -35,6 +35,9 @@ importers:
       node-cron:
         specifier: ^3.0.3
         version: 3.0.3
+      tonapi-sdk-js:
+        specifier: ^1.0.11
+        version: 1.0.11
       tonweb:
         specifier: ^0.0.66
         version: 0.0.66(encoding@0.1.13)(expo@51.0.9(@babel/core@7.24.6)(@babel/preset-env@7.24.6(@babel/core@7.24.6))(encoding@0.1.13))(react-native@0.74.1(@babel/core@7.24.6)(@babel/preset-env@7.24.6(@babel/core@7.24.6))(encoding@0.1.13)(react@18.2.0))
@@ -3822,6 +3825,9 @@ packages:
   toidentifier@1.0.1:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
+
+  tonapi-sdk-js@1.0.11:
+    resolution: {integrity: sha512-6/oHFpfD5GcVppxPUEbXgEfx0YwD2yCwqjeVyEwMsASu7J+UXYQPBGqQupcw51K7OYHE6JTom6/xG0ztYImLgQ==}
 
   tonweb@0.0.66:
     resolution: {integrity: sha512-ntDJU1b/kgMFvOYN09FvhdnAfwnZh8W5sONkUP+P0FQkYRa/027otRxApp5gfxZ9DR+3WTnCQgrsG/EXv8RhEA==}
@@ -9655,6 +9661,8 @@ snapshots:
 
   toidentifier@1.0.1:
     optional: true
+
+  tonapi-sdk-js@1.0.11: {}
 
   tonweb@0.0.66(encoding@0.1.13)(expo@51.0.9(@babel/core@7.24.6)(@babel/preset-env@7.24.6(@babel/core@7.24.6))(encoding@0.1.13))(react-native@0.74.1(@babel/core@7.24.6)(@babel/preset-env@7.24.6(@babel/core@7.24.6))(encoding@0.1.13)(react@18.2.0)):
     dependencies:

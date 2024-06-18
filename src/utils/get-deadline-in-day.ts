@@ -1,0 +1,1 @@
+export const getDeadlineInDay = () =>  Math.floor(Date.now() / 1000 + 86400)
