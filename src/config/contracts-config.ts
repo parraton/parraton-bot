@@ -13,11 +13,13 @@ const notVault = {
   extraDistributionPool: "EQDpkTnKu_fX_ZRotAVsA9yZTfFd35LBtLWfhO6f1Kp2-b1Z",
 };
 
+const isDev = process.env.NODE_ENV === "development";
+
 export const addresses = {
   dedustFactory: "EQDHcPxlCOSN_s-Vlw53bFpibNyKpZHV6xHhxGAAT_21nCFU",
   dedustDistributionFactory: "EQC0WJSeustdSo4fI5eRXmxdu8rqyWz9tBwLmX9E94dQlUCv",
   extraRewardsDistributionFactory:
     "EQDmtWKElPJLGJfjlN060ztD6-CwM_8HFNIFH507qiza-x6H",
   vaultFactory: "EQC3Mcj8A7V3zrmPnOUM3ylpty8Tq2kVIhBWj4cs2rAHnHRK",
-  vaults: [usdtVault]//, scaleVault, notVault],
+  vaults: isDev ? [usdtVault]: [usdtVault, scaleVault, notVault],
 } as const;

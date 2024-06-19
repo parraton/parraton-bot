@@ -27,8 +27,6 @@ const bigIntMax = (...args: Array<bigint>) => args.reduce((m, e) => e > m ? e : 
 
 const applySlippage = (amount: bigint, slippageInPercents = 3n) => (amount * (100n - slippageInPercents)) / 100n;
 
-let TestBrake = process.env.NODE_ENV === "development";
-
 const getAmountsForOperations = async (strategy: OpenedContract<TonJettonTonStrategy>, totalReward: bigint) => {
   const {poolAddress, jettonMasterAddress: jettonAddress} = await strategy.getStrategyData();
 
@@ -50,7 +48,8 @@ const getAmountsForOperations = async (strategy: OpenedContract<TonJettonTonStra
   })
   console.log({tonEquivalent})
 
-  const tonToDeposit = (totalReward + tonEquivalent) / 2n;
+  let tonToDeposit = (totalReward + tonEquivalent) / 2n;
+
   //TODO: change to 0n
   const minimalTonToDeposit = 100n;
   const tonToSwap = bigIntMax(tonToDeposit - tonEquivalent, minimalTonToDeposit);
@@ -66,13 +65,12 @@ const getAmountsForOperations = async (strategy: OpenedContract<TonJettonTonStra
     })
 
     amountOut = eso.amountOut;
+    tonToDeposit = totalReward - tonToSwap;
   }
 
   console.log({amountOut})
 
-  const limit = TestBrake ? applySlippage(amountOut) : applySlippage(amountOut, -5n);
-
-  TestBrake = !TestBrake;
+  const limit = applySlippage(amountOut);
 
   const {deposits} = await pool.getEstimateDepositOut([
     tonToDeposit,
@@ -102,12 +100,12 @@ export const reinvest = async (
   vault: OpenedContract<MegaVault>
 ) => {
   const tonClient = await tonClientPromise;
-  const {managementFeeRate} = await vault.getVaultData();
+  const {managementFeeRate, managementFee} = await vault.getVaultData();
   const strategy = tonClient.open(await vault.getStrategy());
 
   const vaultBalance = await vault.getAccountBalance();
   const foo = excludeFee(vaultBalance, managementFeeRate); //TON
-  const totalReward = foo - MIN_BALANCE; //TON
+  const totalReward = foo - MIN_BALANCE - managementFee; //TON
 
   const {
     limit,

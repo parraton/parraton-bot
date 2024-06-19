@@ -29,6 +29,9 @@ importers:
       '@ton/ton':
         specifier: ^13.11.2
         version: 13.11.2(@ton/core@0.56.3(@ton/crypto@3.2.0))(@ton/crypto@3.2.0)
+      '@types/node-cron':
+        specifier: ^3.0.11
+        version: 3.0.11
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
@@ -48,9 +51,6 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@types/node-cron':
-        specifier: ^3.0.11
-        version: 3.0.11
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
