@@ -27,11 +27,7 @@ const bigIntMax = (...args: Array<bigint>) => args.reduce((m, e) => e > m ? e : 
 
 const applySlippage = (amount: bigint, slippageInPercents = 3n) => (amount * (100n - slippageInPercents)) / 100n;
 
-let TestBrake = true;
-
-const getSwapAmounts = () => {
-
-}
+let TestBrake = process.env.NODE_ENV === "development";
 
 const getAmountsForOperations = async (strategy: OpenedContract<TonJettonTonStrategy>, totalReward: bigint) => {
   const {poolAddress, jettonMasterAddress: jettonAddress} = await strategy.getStrategyData();
@@ -54,8 +50,10 @@ const getAmountsForOperations = async (strategy: OpenedContract<TonJettonTonStra
   })
   console.log({tonEquivalent})
 
-  const tonToDeposit = (totalReward + tonEquivalent) / 2n
-  const tonToSwap = bigIntMax(tonToDeposit - tonEquivalent, 100n);
+  const tonToDeposit = (totalReward + tonEquivalent) / 2n;
+  //TODO: change to 0n
+  const minimalTonToDeposit = 100n;
+  const tonToSwap = bigIntMax(tonToDeposit - tonEquivalent, minimalTonToDeposit);
 
   console.log({tonToDeposit, tonToSwap})
 
