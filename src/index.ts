@@ -5,7 +5,6 @@ import {mockDedustDistribution} from "./mock-dedust-distribution";
 import {sendReinvest} from "./send-reinvest";
 import {vaultExtraRewardsDistribution} from "./vault-extra-rewards-distribution";
 
-
 const reinvestScenario = async () => {
   try {
     await mockDedustDistribution();
