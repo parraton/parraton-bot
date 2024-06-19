@@ -79,7 +79,7 @@ export const sendReinvest = async () => {
       continue;
     }
 
-    // await claimScenario(vault, distributionPool, manager, address);
+    await claimScenario(vault, distributionPool, manager, address);
 
     await reinvestScenario(vault, manager, address);
   }
