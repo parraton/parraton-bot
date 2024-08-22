@@ -6,7 +6,7 @@ import {
 } from "./core/functions/distribute-dedust-distribution-rewards";
 import { environment } from "./config/environment";
 import { addresses } from "./config/contracts-config";
-import { Vault } from "./core/contracts";
+import { Vault } from "@parraton/sdk";
 import { Address, toNano } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
 import { tonClientPromise } from "./config/ton-client";

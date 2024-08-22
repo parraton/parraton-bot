@@ -1,5 +1,4 @@
-import {Vault} from "../contracts/vault";
-import {TonJettonTonStrategy} from "../contracts/TonJettonTonStrategy";
+import {Vault, TonJettonTonStrategy} from "@parraton/sdk"
 import {Address, ContractProvider} from "@ton/core";
 import {getAccountBalance} from "../../utils/get-account-balance";
 import {tonClientPromise} from "../../config/ton-client";

@@ -17,7 +17,7 @@ import { DictionaryUtils } from "../../utils/dictionary";
 import { tonClientPromise } from "../../config/ton-client";
 import { getAllJettonHolders } from "../../utils/get-jetton-holders";
 import { fetchDictionaryFromIpfs } from "../../utils/fetch-dictionary-from-ipfs";
-import { Vault } from "../contracts";
+import { Vault } from "@parraton/sdk";
 
 const pinata = new pinataSDK({ pinataJWTKey: environment.PINATA_JWT });
 

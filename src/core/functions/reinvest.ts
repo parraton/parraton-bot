@@ -1,6 +1,6 @@
 import {Address, OpenedContract, Sender, toNano} from "@ton/core";
 import {Asset} from "@dedust/sdk";
-import {TonJettonTonStrategy} from "../contracts/TonJettonTonStrategy";
+import {TonJettonTonStrategy} from "@parraton/sdk";
 import {tonClientPromise} from "../../config/ton-client";
 import {getAccountBalance} from "../../utils/get-account-balance";
 import {getDeadlineInDay} from "../../utils/get-deadline-in-day";

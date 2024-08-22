@@ -10,25 +10,28 @@ importers:
     dependencies:
       '@dedust/apiary-v1':
         specifier: ^0.0.1
-        version: 0.0.1(@ton/core@0.56.3(@ton/crypto@3.2.0))
+        version: 0.0.1(@ton/core@0.57.0(@ton/crypto@3.2.0))
       '@dedust/sdk':
         specifier: ^0.8.7
-        version: 0.8.7(@ton/core@0.56.3(@ton/crypto@3.2.0))(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)
+        version: 0.8.7(@ton/core@0.57.0(@ton/crypto@3.2.0))(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)
       '@orbs-network/ton-access':
         specifier: ^2.3.3
         version: 2.3.3(encoding@0.1.13)
+      '@parraton/sdk':
+        specifier: ^1.0.4
+        version: 1.0.4(@ton/crypto@3.2.0)(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)
       '@pinata/sdk':
         specifier: ^2.1.0
         version: 2.1.0
       '@ton/core':
-        specifier: ^0.56.3
-        version: 0.56.3(@ton/crypto@3.2.0)
+        specifier: ^0.57.0
+        version: 0.57.0(@ton/crypto@3.2.0)
       '@ton/crypto':
         specifier: ^3.2.0
         version: 3.2.0
       '@ton/ton':
         specifier: ^13.11.2
-        version: 13.11.2(@ton/core@0.56.3(@ton/crypto@3.2.0))(@ton/crypto@3.2.0)
+        version: 13.11.2(@ton/core@0.57.0(@ton/crypto@3.2.0))(@ton/crypto@3.2.0)
       '@types/node-cron':
         specifier: ^3.0.11
         version: 3.0.11
@@ -1007,6 +1010,9 @@ packages:
   '@orbs-network/ton-access@2.3.3':
     resolution: {integrity: sha512-b1miCPts7wBG9JKYgzXIRZQm/LMy5Uk1mNK8NzlcXHL3HRHJkkFbuYJGuj3IkWCiIicW3Ipp4sYnn3Fwo4oB0g==}
 
+  '@parraton/sdk@1.0.4':
+    resolution: {integrity: sha512-7AeAYf5b6I/iFf4nlYqJFhlEORqKyoJTkSDeXnRk04mzNMhkwzozJShfWuTZaEFLrDrLO/gaqtk1MqWZeoXPtw==}
+
   '@peculiar/asn1-schema@2.3.8':
     resolution: {integrity: sha512-ULB1XqHKx1WBU/tTFIA+uARuRoBVZ4pNdOA878RDrRbBfBGcSzi5HBkdScC6ZbHn8z7L8gmKCgPC1LHRrP46tA==}
 
@@ -1148,8 +1154,8 @@ packages:
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
 
-  '@ton/core@0.56.3':
-    resolution: {integrity: sha512-HVkalfqw8zqLLPehtq0CNhu5KjVzc7IrbDwDHPjGoOSXmnqSobiWj8a5F+YuWnZnEbQKtrnMGNOOjVw4LG37rg==}
+  '@ton/core@0.57.0':
+    resolution: {integrity: sha512-UOehEXEV5yqi+17qmmWdD01YfVgQlYtitSm5OfN/WMg6PAMkt+Uf91JRC4mdPNtkKDhyKuujJuhYs6QiOsHPfw==}
     peerDependencies:
       '@ton/crypto': '>=3.2.0'
 
@@ -5236,13 +5242,13 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@dedust/apiary-v1@0.0.1(@ton/core@0.56.3(@ton/crypto@3.2.0))':
+  '@dedust/apiary-v1@0.0.1(@ton/core@0.57.0(@ton/crypto@3.2.0))':
     dependencies:
-      '@ton/core': 0.56.3(@ton/crypto@3.2.0)
+      '@ton/core': 0.57.0(@ton/crypto@3.2.0)
 
-  '@dedust/sdk@0.8.7(@ton/core@0.56.3(@ton/crypto@3.2.0))(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)':
+  '@dedust/sdk@0.8.7(@ton/core@0.57.0(@ton/crypto@3.2.0))(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)':
     dependencies:
-      '@ton/core': 0.56.3(@ton/crypto@3.2.0)
+      '@ton/core': 0.57.0(@ton/crypto@3.2.0)
       '@tonconnect/sdk': 3.0.3(encoding@0.1.13)
       axios: 1.7.2
 
@@ -5715,6 +5721,15 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@parraton/sdk@1.0.4(@ton/crypto@3.2.0)(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)':
+    dependencies:
+      '@dedust/sdk': 0.8.7(@ton/core@0.57.0(@ton/crypto@3.2.0))(@tonconnect/sdk@3.0.3(encoding@0.1.13))(axios@1.7.2)
+      '@ton/core': 0.57.0(@ton/crypto@3.2.0)
+    transitivePeerDependencies:
+      - '@ton/crypto'
+      - '@tonconnect/sdk'
+      - axios
+
   '@peculiar/asn1-schema@2.3.8':
     dependencies:
       asn1js: 3.0.5
@@ -6097,7 +6112,7 @@ snapshots:
       '@sinonjs/commons': 3.0.1
     optional: true
 
-  '@ton/core@0.56.3(@ton/crypto@3.2.0)':
+  '@ton/core@0.57.0(@ton/crypto@3.2.0)':
     dependencies:
       '@ton/crypto': 3.2.0
       symbol.inspect: 1.0.1
@@ -6112,9 +6127,9 @@ snapshots:
       jssha: 3.2.0
       tweetnacl: 1.0.3
 
-  '@ton/ton@13.11.2(@ton/core@0.56.3(@ton/crypto@3.2.0))(@ton/crypto@3.2.0)':
+  '@ton/ton@13.11.2(@ton/core@0.57.0(@ton/crypto@3.2.0))(@ton/crypto@3.2.0)':
     dependencies:
-      '@ton/core': 0.56.3(@ton/crypto@3.2.0)
+      '@ton/core': 0.57.0(@ton/crypto@3.2.0)
       '@ton/crypto': 3.2.0
       axios: 1.7.2
       dataloader: 2.2.2
