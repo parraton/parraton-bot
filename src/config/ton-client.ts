@@ -103,6 +103,6 @@ class CustomTonClient extends TonClient4 {
 export const tonClientPromise = (async () =>
   new CustomTonClient({
     endpoint: await getHttpV4Endpoint({
-      network: environment.NETWORK as Network,
+      network: environment.NETWORK,
     }),
   }))();
