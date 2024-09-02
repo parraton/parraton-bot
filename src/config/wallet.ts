@@ -1,46 +1,25 @@
-import { WalletContractV3R2 } from '@ton/ton';
-import { KeyPair, mnemonicToSeed } from '@ton/crypto';
-import { environment } from './environment';
-import nacl from 'tweetnacl';
-import {OpenedContract, Sender} from "@ton/core";
-import {tonClientPromise} from "./ton-client";
-
-function normalizeMnemonic(src: string[]) {
-  return src.map((v) => v.toLowerCase().trim());
-}
-
-export async function mnemonicToPrivateKey(
-  mnemonicArray: string[],
-  seed: string,
-  password?: string | null | undefined,
-): Promise<KeyPair> {
-  const n_mnemonicArray = normalizeMnemonic(mnemonicArray);
-  const g_seed = await mnemonicToSeed(n_mnemonicArray, seed, password);
-  const keyPair = nacl.sign.keyPair.fromSeed(g_seed.slice(0, 32));
-
-  return {
-    publicKey: Buffer.from(keyPair.publicKey),
-    secretKey: Buffer.from(keyPair.secretKey),
-  };
-}
+import { WalletContractV4 } from "@ton/ton";
+import { mnemonicToWalletKey } from "@ton/crypto";
+import { environment } from "./environment";
+import { OpenedContract, Sender } from "@ton/core";
+import { tonClientPromise } from "./ton-client";
 
 export interface WalletSender {
-  wallet: OpenedContract<WalletContractV3R2>;
+  wallet: OpenedContract<WalletContractV4>;
   sender: Sender;
 }
 
-const getWallet = async (num?: number): Promise<WalletSender> => {
-  const mnemonicArray = environment.SEED_PHRASE.split(' ');
-  const seed = `${0}${num ?? 0}`;
+const getWallet = async (mnemonic: string): Promise<WalletSender> => {
+  const mnemonicArray = mnemonic.split(" ");
 
-  const keys = await mnemonicToPrivateKey(mnemonicArray, seed);
+  const keys = await mnemonicToWalletKey(mnemonicArray);
   const tonClient = await tonClientPromise;
 
   const wallet = tonClient.open(
-    WalletContractV3R2.create({
+    WalletContractV4.create({
       workchain: 0,
       publicKey: keys.publicKey,
-    }),
+    })
   );
 
   return {
@@ -49,6 +28,10 @@ const getWallet = async (num?: number): Promise<WalletSender> => {
   };
 };
 
-export const managerWalletPromise = getWallet(0);
-export const dedustGovernorWalletPromise = getWallet(1);
-export const vaultGovernorWalletPromise = getWallet(2);
+export const managerWalletPromise = getWallet(environment.MANAGER_SEED_PHRASE);
+export const dedustGovernorWalletPromise = getWallet(
+  environment.DEDUST_GOVERNOR_SEED_PHRASE
+);
+export const vaultGovernorWalletPromise = getWallet(
+  environment.VAULT_GOVERNOR_SEED_PHRASE
+);
