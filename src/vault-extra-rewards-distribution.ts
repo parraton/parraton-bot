@@ -8,13 +8,16 @@ import { environment } from "./config/environment";
 import { addresses } from "./config/contracts-config";
 import { Address, toNano } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
-import {tonClientPromise} from "./config/ton-client";
+import { tonClientPromise } from "./config/ton-client";
 
 export const vaultExtraRewardsDistribution = async () => {
   const { wallet, sender: governor } = await vaultGovernorWalletPromise;
   const address = wallet.address.toString();
   const tonClient = await tonClientPromise;
   for (const vaultData of addresses.vaults) {
+    if (!vaultData.extraDistributionPool) {
+      continue;
+    }
     const distributionPool = tonClient.open(
       DistributionPool.createFromAddress(
         Address.parse(vaultData.extraDistributionPool)
