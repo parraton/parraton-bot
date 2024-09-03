@@ -33,7 +33,7 @@ const extraRewardsScenario = async () => {
 switch (process.env.NODE_ENV) {
   case "development":
   case "dev":
-    void reinvestScenario();
+    void reinvestScenario(true);
     break;
   case "testnet":
     const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
