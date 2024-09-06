@@ -10,7 +10,7 @@ const reinvestScenario = async (distributeRewards: boolean = false) => {
     if (distributeRewards) {
       await mockDedustDistribution();
     }
-
+    console.log("reinvestScenario");
     await sendReinvest();
   } catch (e) {
     console.error(e);
@@ -47,6 +47,6 @@ switch (process.env.NETWORK) {
     schedule(vaultExtraRewardsDistributionSchedule, extraRewardsScenario);
     break;
   default:
-    const reinvestSchedule = "15 19 * * *"; // every day at 19:05
+    const reinvestSchedule = "25 19 * * *"; // every day at 19:05
     schedule(reinvestSchedule, reinvestOnlyScenario);
 }

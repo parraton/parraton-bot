@@ -56,6 +56,7 @@ const reinvestScenario = async (
   if (!(await isReinvestNeeded(vault.address))) {
     return console.log(`No reinvest needed for ${vault.address}`);
   }
+  console.log("Reinvest needed");
 
   let retry = true;
 
@@ -86,9 +87,11 @@ export const sendReinvest = async () => {
       .then((p) => p.open());
 
     if (await distributionPool.getIsClaimRewardsNeeded(vault.address)) {
+      console.log("Claim rewards");
       await claimScenario(vault, distributionPool, manager, address);
     }
 
+    console.log("Reinvest");
     await reinvestScenario(vault, manager, address);
   }
 };
