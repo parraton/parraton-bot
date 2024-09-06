@@ -46,6 +46,6 @@ switch (process.env.NODE_ENV) {
     schedule(vaultExtraRewardsDistributionSchedule, extraRewardsScenario);
     break;
   default:
-    const reinvestSchedule = "0 0 * * *"; // every day at 00:00
+    const reinvestSchedule = "0 19 * * *"; // every day at 19:00
     schedule(reinvestSchedule, reinvestOnlyScenario);
 }
