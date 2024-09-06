@@ -47,7 +47,7 @@ export class MegaDistributionPool extends DistributionPool {
       return true;
     }
 
-    const previousRewards = accountData.totalPaid;
+    const previousRewards = accountData.totalPaid ?? 0n;
 
     let { dataUri } = await this.getRewardsData(provider);
 
@@ -58,7 +58,10 @@ export class MegaDistributionPool extends DistributionPool {
     const rewardsDictionary = await fetchDictionaryFromIpfs(dataUri);
     const rewards = rewardsDictionary.get(userAddress) ?? 0n;
     const newRewards = rewards - previousRewards;
+    console.log({ newRewards, MIN_REWARDS_TO_CLAIM });
+    console.log(newRewards > MIN_REWARDS_TO_CLAIM);
 
-    return newRewards > MIN_REWARDS_TO_CLAIM;
+    // return newRewards > MIN_REWARDS_TO_CLAIM;
+    return false;
   }
 }
