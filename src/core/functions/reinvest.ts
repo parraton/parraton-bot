@@ -56,10 +56,15 @@ const getAmountsForOperations = async (
   }
 
   console.log({ balance });
-  const { amountOut: tonEquivalent } = await pool.getEstimatedSwapOut({
-    assetIn: jettonAsset,
-    amountIn: balance,
-  });
+  let tonEquivalent = 0n;
+
+  if (balance > 0n) {
+    const { amountOut } = await pool.getEstimatedSwapOut({
+      assetIn: jettonAsset,
+      amountIn: balance,
+    });
+    tonEquivalent = amountOut;
+  }
   console.log({ tonEquivalent });
 
   let tonToDeposit = (totalReward + tonEquivalent) / 2n;
