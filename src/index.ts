@@ -30,8 +30,8 @@ const extraRewardsScenario = async () => {
   }
 };
 
-console.log(process.env.NODE_ENV);
-switch (process.env.NODE_ENV) {
+console.log(process.env.NETWORK);
+switch (process.env.NETWORK) {
   case "development":
   case "dev":
     void reinvestScenario(true);

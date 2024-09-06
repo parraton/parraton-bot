@@ -10,7 +10,7 @@ import { MegaPool } from "../mega/mega-pool";
 
 const MIN_BALANCE = toNano(1);
 const MIN_REINVEST_AMOUNT =
-  process.env.NODE_ENV === "development" ? toNano(0.5) : toNano(4);
+  process.env.NETWORK === "development" ? toNano(0.5) : toNano(4);
 
 const depositFee = toNano(0.3);
 const depositFwdFee = toNano(0.25);

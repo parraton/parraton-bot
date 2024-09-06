@@ -22,7 +22,7 @@ const {
   MANAGER_SEED_PHRASE,
   DEDUST_GOVERNOR_SEED_PHRASE,
   VAULT_GOVERNOR_SEED_PHRASE,
-  NODE_ENV,
+  NETWORK,
 } = process.env;
 
 export const testnetEnvironment: Environment = {
@@ -54,4 +54,4 @@ export const mainnetEnvironment: Environment = {
 };
 
 export const environment =
-  NODE_ENV === "mainnet" ? mainnetEnvironment : testnetEnvironment;
+  NETWORK === "mainnet" ? mainnetEnvironment : testnetEnvironment;
