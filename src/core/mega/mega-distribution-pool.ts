@@ -41,13 +41,11 @@ export class MegaDistributionPool extends DistributionPool {
     );
 
     let accountData;
+    let previousRewards = 0n;
     try {
       accountData = await distributionAccount.getAccountData(provider);
-    } catch (e) {
-      return true;
-    }
-
-    const previousRewards = accountData.totalPaid ?? 0n;
+      previousRewards = accountData.totalPaid ?? 0n;
+    } catch (e) {}
 
     let { dataUri } = await this.getRewardsData(provider);
 
@@ -61,7 +59,7 @@ export class MegaDistributionPool extends DistributionPool {
     console.log({ newRewards, MIN_REWARDS_TO_CLAIM });
     console.log(newRewards > MIN_REWARDS_TO_CLAIM);
 
-    // return newRewards > MIN_REWARDS_TO_CLAIM;
+    return newRewards > MIN_REWARDS_TO_CLAIM;
     return false;
   }
 }
