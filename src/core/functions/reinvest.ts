@@ -64,8 +64,7 @@ const getAmountsForOperations = async (
 
   let tonToDeposit = (totalReward + tonEquivalent) / 2n;
 
-  //TODO: change to 0n
-  const minimalTonToDeposit = 100n;
+  const minimalTonToDeposit = 0n;
   const tonToSwap = bigIntMax(
     tonToDeposit - tonEquivalent,
     minimalTonToDeposit
