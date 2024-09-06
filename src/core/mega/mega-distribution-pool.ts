@@ -1,8 +1,9 @@
-import {DistributionAccount, DistributionPool} from "@dedust/apiary-v1";
-import {Address, ContractProvider} from "@ton/core";
-import {tonClientPromise} from "../../config/ton-client";
-import {fetchDictionaryFromIpfs} from "../../utils/fetch-dictionary-from-ipfs";
+import { DistributionAccount, DistributionPool } from "@dedust/apiary-v1";
+import { Address, ContractProvider, toNano } from "@ton/core";
+import { tonClientPromise } from "../../config/ton-client";
+import { fetchDictionaryFromIpfs } from "../../utils/fetch-dictionary-from-ipfs";
 
+const MIN_REWARDS_TO_CLAIM = toNano("1");
 
 export class MegaDistributionPool extends DistributionPool {
   static createFromAddress(address: Address): MegaDistributionPool {
@@ -27,7 +28,6 @@ export class MegaDistributionPool extends DistributionPool {
     super(address);
   }
 
-
   async getIsClaimRewardsNeeded(
     provider: ContractProvider,
     userAddress: Address
@@ -36,7 +36,9 @@ export class MegaDistributionPool extends DistributionPool {
       provider,
       userAddress
     );
-    const distributionAccount = DistributionAccount.createFromAddress(distributionAccountAddress)
+    const distributionAccount = DistributionAccount.createFromAddress(
+      distributionAccountAddress
+    );
 
     let accountData;
     try {
@@ -57,6 +59,6 @@ export class MegaDistributionPool extends DistributionPool {
     const rewards = rewardsDictionary.get(userAddress) ?? 0n;
     const newRewards = rewards - previousRewards;
 
-    return newRewards > 0n;
+    return newRewards > MIN_REWARDS_TO_CLAIM;
   }
 }

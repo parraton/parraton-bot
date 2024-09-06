@@ -10,7 +10,7 @@ import { MegaPool } from "../mega/mega-pool";
 
 const MIN_BALANCE = toNano(1);
 const MIN_REINVEST_AMOUNT =
-  process.env.NETWORK === "development" ? toNano(0.5) : toNano(4);
+  process.env.NETWORK === "development" ? toNano(0.5) : toNano(3);
 
 const depositFee = toNano(0.3);
 const depositFwdFee = toNano(0.25);
@@ -21,6 +21,7 @@ export const isReinvestNeeded = async (vaultAddress: Address) => {
   const vaultBalance = await getAccountBalance(vaultAddress);
 
   const totalReward = vaultBalance - MIN_BALANCE;
+  console.log("totalReward", totalReward);
 
   return totalReward > MIN_REINVEST_AMOUNT;
 };
