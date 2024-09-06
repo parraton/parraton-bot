@@ -29,7 +29,7 @@ export const isReinvestNeeded = async (vaultAddress: Address) => {
 const bigIntMax = (...args: Array<bigint>) =>
   args.reduce((m, e) => (e > m ? e : m));
 
-const applySlippage = (amount: bigint, slippageInPercents = 3n) =>
+const applySlippage = (amount: bigint, slippageInPercents = 1n) =>
   (amount * (100n - slippageInPercents)) / 100n;
 
 const getAmountsForOperations = async (
@@ -48,7 +48,12 @@ const getAmountsForOperations = async (
 
   console.log({ totalReward });
 
-  const balance = await jettonRoot.getUserBalance(strategy.address);
+  let balance = 0n;
+  try {
+    balance = await jettonRoot.getUserBalance(strategy.address);
+  } catch (e) {
+    console.log("No jetton balance");
+  }
 
   console.log({ balance });
   const { amountOut: tonEquivalent } = await pool.getEstimatedSwapOut({
