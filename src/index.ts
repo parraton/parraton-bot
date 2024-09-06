@@ -30,6 +30,7 @@ const extraRewardsScenario = async () => {
   }
 };
 
+console.log(process.env.NODE_ENV);
 switch (process.env.NODE_ENV) {
   case "development":
   case "dev":
@@ -46,6 +47,6 @@ switch (process.env.NODE_ENV) {
     schedule(vaultExtraRewardsDistributionSchedule, extraRewardsScenario);
     break;
   default:
-    const reinvestSchedule = "5 19 * * *"; // every day at 19:05
+    const reinvestSchedule = "15 19 * * *"; // every day at 19:05
     schedule(reinvestSchedule, reinvestOnlyScenario);
 }
