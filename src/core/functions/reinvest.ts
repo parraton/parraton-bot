@@ -1,7 +1,7 @@
 import { Address, OpenedContract, Sender, toNano } from "@ton/core";
 import { Asset } from "@dedust/sdk";
 import { TonJettonTonStrategy } from "../contracts/TonJettonTonStrategy";
-import { tonClientPromise } from "../../config/ton-client";
+import { tonClientPromise } from "../../config-old/ton-client";
 import { getAccountBalance } from "../../utils/get-account-balance";
 import { getDeadlineInDay } from "../../utils/get-deadline-in-day";
 import { MegaVault } from "../mega/mega-vault";

@@ -1,6 +1,6 @@
-import {Asset, JettonRoot} from "@dedust/sdk";
-import {Address, ContractProvider} from "@ton/core";
-import {tonClientPromise} from "../../config/ton-client";
+import { Asset, JettonRoot } from "@dedust/sdk";
+import { Address, ContractProvider } from "@ton/core";
+import { tonClientPromise } from "../../config-old/ton-client";
 
 // @ts-ignore
 export class MegaJettonRoot extends JettonRoot {
@@ -13,10 +13,7 @@ export class MegaJettonRoot extends JettonRoot {
     return new MegaJettonRoot(address);
   }
 
-  async getUserBalance(
-    provider: ContractProvider,
-    userAddress: Address
-  ) {
+  async getUserBalance(provider: ContractProvider, userAddress: Address) {
     const userWallet = await this.getWallet(provider, userAddress);
 
     const tonClient = await tonClientPromise;
@@ -25,7 +22,7 @@ export class MegaJettonRoot extends JettonRoot {
   }
 
   getAsset() {
-    return Asset.jetton(this.address)
+    return Asset.jetton(this.address);
   }
 
   static async open(address: Address) {

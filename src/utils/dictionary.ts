@@ -1,4 +1,5 @@
-import {Address, beginCell, Cell, Dictionary} from "@ton/core";
+import { Address, beginCell, Cell, Dictionary } from "@ton/core";
+import { environment } from "../config-old/environment";
 
 export class DictionaryUtils {
   static fromBoc(buffer: Buffer) {
@@ -6,11 +7,11 @@ export class DictionaryUtils {
       .beginParse()
       .loadDictDirect(
         Dictionary.Keys.Address(),
-        Dictionary.Values.BigVarUint(4),
+        Dictionary.Values.BigVarUint(4)
       );
   }
 
-  static toBoc(dictionary:  Dictionary<Address, bigint>) {
+  static toBoc(dictionary: Dictionary<Address, bigint>) {
     return beginCell().storeDictDirect(dictionary).endCell().toBoc();
   }
 }

@@ -1,15 +1,15 @@
-import { dedustGovernorWalletPromise } from "./config/wallet";
+import { dedustGovernorWalletPromise } from "./config-old/wallet";
 import { wait } from "./wait";
 import {
   distributeRewards,
   prepareDedustMockRewards,
 } from "./core/functions/distribute-dedust-distribution-rewards";
-import { environment } from "./config/environment";
-import { addresses } from "./config/contracts-config";
+import { environment } from "./config-old/environment";
+import { addresses } from "./config-old/contracts-config";
 import { Vault } from "./core/contracts";
 import { Address, toNano } from "@ton/core";
 import { DistributionPool } from "@dedust/apiary-v1";
-import { tonClientPromise } from "./config/ton-client";
+import { tonClientPromise } from "./config-old/ton-client";
 
 export const mockDedustDistribution = async () => {
   const { wallet, sender: governor } = await dedustGovernorWalletPromise;

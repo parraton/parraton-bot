@@ -1,16 +1,12 @@
 import { schedule } from "node-cron";
-
 import { mockDedustDistribution } from "./mock-dedust-distribution";
-
 import { sendReinvest } from "./send-reinvest";
-import { vaultExtraRewardsDistribution } from "./vault-extra-rewards-distribution";
 
 const reinvestScenario = async (distributeRewards: boolean = false) => {
   try {
     if (distributeRewards) {
       await mockDedustDistribution();
     }
-    console.log("reinvestScenario");
     await sendReinvest();
   } catch (e) {
     console.error(e);
@@ -21,14 +17,6 @@ const reinvestWithMockDedustDistributionScenario = async () =>
   reinvestScenario(true);
 
 const reinvestOnlyScenario = async () => reinvestScenario();
-
-const extraRewardsScenario = async () => {
-  try {
-    await vaultExtraRewardsDistribution();
-  } catch (e) {
-    console.error(e);
-  }
-};
 
 console.log(process.env.NETWORK);
 switch (process.env.NETWORK) {
@@ -44,7 +32,6 @@ switch (process.env.NETWORK) {
       dedustReinvestSchedule,
       reinvestWithMockDedustDistributionScenario
     );
-    schedule(vaultExtraRewardsDistributionSchedule, extraRewardsScenario);
     break;
   default:
     const reinvestSchedule = "45 20 * * *"; // every day at 19:05

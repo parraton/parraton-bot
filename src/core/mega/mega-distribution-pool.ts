@@ -1,6 +1,6 @@
 import { DistributionAccount, DistributionPool } from "@dedust/apiary-v1";
 import { Address, ContractProvider, toNano } from "@ton/core";
-import { tonClientPromise } from "../../config/ton-client";
+import { tonClientPromise } from "../../config-old/ton-client";
 import { fetchDictionaryFromIpfs } from "../../utils/fetch-dictionary-from-ipfs";
 
 const MIN_REWARDS_TO_CLAIM = toNano("1");
@@ -60,6 +60,5 @@ export class MegaDistributionPool extends DistributionPool {
     console.log(newRewards > MIN_REWARDS_TO_CLAIM);
 
     return newRewards > MIN_REWARDS_TO_CLAIM;
-    return false;
   }
 }

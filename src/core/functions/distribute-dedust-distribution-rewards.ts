@@ -8,13 +8,13 @@ import {
   toNano,
 } from "@ton/core";
 import { DistributionAccount, DistributionPool } from "@dedust/apiary-v1";
-import { environment } from "../../config/environment";
+import { environment } from "../../config-old/environment";
 import pinataSDK from "@pinata/sdk";
 import fs from "fs";
 import path from "path";
 import { PinataPinOptions } from "@pinata/sdk/src/commands/pinning/pinFileToIPFS";
 import { DictionaryUtils } from "../../utils/dictionary";
-import { tonClientPromise } from "../../config/ton-client";
+import { tonClientPromise } from "../../config-old/ton-client";
 import { getAllJettonHolders } from "../../utils/get-jetton-holders";
 import { fetchDictionaryFromIpfs } from "../../utils/fetch-dictionary-from-ipfs";
 import { Vault } from "../contracts";

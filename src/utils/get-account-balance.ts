@@ -1,5 +1,5 @@
-import {Address} from "@ton/core";
-import {tonClientPromise} from "../config/ton-client";
+import { Address } from "@ton/core";
+import { tonClientPromise } from "../config-old/ton-client";
 
 export const getAccountBalance = async (accountAddress: Address) => {
   const tonClient = await tonClientPromise;

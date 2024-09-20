@@ -1,8 +1,8 @@
-import {environment} from "../config/environment";
+import { environment } from "../config-old/environment";
 
 const createUrl = (hash: string) => {
-  return environment.TONAPI_URL + '/v2/events/' + hash;
-}
+  return environment.TONAPI_URL + "/v2/events/" + hash;
+};
 
 export const isTransactionFinished = async (hash: string): Promise<boolean> => {
   const url = createUrl(hash);
@@ -13,10 +13,10 @@ export const isTransactionFinished = async (hash: string): Promise<boolean> => {
     return false;
   }
 
-  const {in_progress}= await response.json() as { in_progress: boolean };
+  const { in_progress } = (await response.json()) as { in_progress: boolean };
 
   return in_progress != undefined && !in_progress;
-}
+};
 
 export const waitTransaction = async (hash: string): Promise<void> => {
   let isFinished = false;
@@ -24,4 +24,4 @@ export const waitTransaction = async (hash: string): Promise<void> => {
     isFinished = await isTransactionFinished(hash);
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
-}
+};

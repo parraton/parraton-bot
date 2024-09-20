@@ -1,6 +1,6 @@
-import {Pool} from "@dedust/sdk";
-import {Address} from "@ton/core";
-import {tonClientPromise} from "../../config/ton-client";
+import { Pool } from "@dedust/sdk";
+import { Address } from "@ton/core";
+import { tonClientPromise } from "../../config-old/ton-client";
 
 export class MegaPool extends Pool {
   private constructor(address: Address) {

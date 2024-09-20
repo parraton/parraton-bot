@@ -1,8 +1,11 @@
-import {Address} from "@ton/core";
-import {tonClientPromise} from "../config/ton-client";
-import {JettonRoot} from "@dedust/sdk";
+import { Address } from "@ton/core";
+import { tonClientPromise } from "../config-old/ton-client";
+import { JettonRoot } from "@dedust/sdk";
 
-export const getJettonWalletBalance = async (jettonMasterAddress: Address, userAddress:Address) => {
+export const getJettonWalletBalance = async (
+  jettonMasterAddress: Address,
+  userAddress: Address
+) => {
   const tonClient = await tonClientPromise;
   const rawJettonRoot = JettonRoot.createFromAddress(jettonMasterAddress);
   const jettonRoot = tonClient.open(rawJettonRoot);
@@ -10,4 +13,4 @@ export const getJettonWalletBalance = async (jettonMasterAddress: Address, userA
   const userWallet = tonClient.open(rawUserWallet);
 
   return await userWallet.getBalance();
-}
+};

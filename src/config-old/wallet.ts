@@ -32,6 +32,3 @@ export const managerWalletPromise = getWallet(environment.MANAGER_SEED_PHRASE);
 export const dedustGovernorWalletPromise = getWallet(
   environment.DEDUST_GOVERNOR_SEED_PHRASE
 );
-export const vaultGovernorWalletPromise = getWallet(
-  environment.VAULT_GOVERNOR_SEED_PHRASE
-);

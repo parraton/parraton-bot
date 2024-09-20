@@ -1,14 +1,19 @@
-import { managerWalletPromise } from "./config/wallet";
+import { managerWalletPromise } from "./config-old/wallet";
 import { wait } from "./wait";
 import { isReinvestNeeded, reinvest } from "./core/functions/reinvest";
 import { claimRewards } from "./core/functions/claim-rewards";
-import { addresses } from "./config/contracts-config";
-import { Address, OpenedContract, Sender } from "@ton/core";
+import { RETRY_CONFIG, vaults } from "./constants";
+import { Address, Cell, Dictionary, OpenedContract, Sender } from "@ton/core";
 import { MegaVault } from "./core/mega/mega-vault";
 import { logOperation } from "./utils/log";
 import { MegaDistributionPool } from "./core/mega/mega-distribution-pool";
 import { getTraces } from "./utils/get-traces";
 import { Trace } from "tonapi-sdk-js";
+import { Vault } from "@parraton/sdk";
+import { tonClient } from "./ton-client";
+import { DistributionAccount, DistributionPool } from "@dedust/apiary-v1";
+import memoizee from "memoizee";
+import { fetchDictionaryFromIpfs } from "./utils/dictionary";
 
 const claimScenario = async (
   vault: OpenedContract<MegaVault>,
@@ -77,7 +82,7 @@ export const sendReinvest = async () => {
   const address = wallet.address.toString();
 
   const vaults = addresses.vaults
-    .map(({ vault }) => vault)
+    .map((vault) => vault)
     .map(Address.parse.bind(Address))
     .map(MegaVault.open);
 
@@ -87,11 +92,9 @@ export const sendReinvest = async () => {
       .then((p) => p.open());
 
     if (await distributionPool.getIsClaimRewardsNeeded(vault.address)) {
-      console.log("Claim rewards");
       await claimScenario(vault, distributionPool, manager, address);
     }
 
-    console.log("Reinvest");
     await reinvestScenario(vault, manager, address);
   }
 };
