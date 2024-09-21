@@ -10,11 +10,6 @@ export const DEDUST_GOVERNOR_SEED_PHRASE =
 
 export const TONAPI_URL = process.env.TONAPI_URL || "https://tonapi.io";
 
-export const TON_CLIENT_URL =
-  process.env.TON_CLIENT_URL || "https://toncenter.com/api/v2/jsonRPC";
-
-export const TONCENTER_API_KEY = process.env.TONCENTER_API_KEY || "";
-
 export const IPFS_GATEWAY =
   process.env.IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs/";
 

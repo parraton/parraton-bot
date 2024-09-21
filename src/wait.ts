@@ -1,28 +1,18 @@
-import { tonweb } from "./tonweb";
-
-type WaitResult = {
-  hash: string;
-  success: boolean;
-};
-
-type SuccessChecker = (hash: string) => boolean | Promise<boolean>;
-
-import { TONAPI_URL } from "./config";
-
-const createUrl = (hash: string) => {
-  return TONAPI_URL + "/v2/events/" + hash;
-};
+import { tonApiClient } from "./ton-api";
+import { TraceIDs } from "tonapi-sdk-js";
+import asyncRetry from "async-retry";
+import { RETRY_CONFIG } from "./constants";
 
 const isTransactionFinished = async (hash: string): Promise<boolean> => {
-  const url = createUrl(hash);
-  const response = await fetch(url);
-
-  if (!response.ok) {
+  try {
+    const { in_progress } = await asyncRetry(
+      async () => await tonApiClient.events.getEvent(hash),
+      RETRY_CONFIG
+    );
+    return !in_progress;
+  } catch (e) {
     return false;
   }
-
-  const { in_progress } = (await response.json()) as { in_progress: boolean };
-  return in_progress != undefined && !in_progress;
 };
 
 const waitTransaction = async (hash: string): Promise<void> => {
@@ -33,14 +23,11 @@ const waitTransaction = async (hash: string): Promise<void> => {
   }
 };
 
-const getTransactions = (
-  address: string
-): ReturnType<typeof tonweb.getTransactions> =>
-  tonweb.provider.getTransactions(address, 1, void 0, void 0, void 0, true);
-
-const base64ToHex = (base64: string) => {
-  return Buffer.from(base64, "base64").toString("hex");
-};
+const getTraces = async (address: string): Promise<TraceIDs> =>
+  await asyncRetry(
+    async () => tonApiClient.accounts.getAccountTraces(address, { limit: 1 }),
+    RETRY_CONFIG
+  );
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
@@ -54,28 +41,25 @@ const getNewTxHash = async (
 
     while (newTxHash == prevTxHash) {
       await sleep(5000);
-      const transactions = await getTransactions(address);
-      newTxHash = transactions.at(0)?.transaction_id?.hash;
+      const { traces } = await getTraces(address);
+      newTxHash = traces.at(0)?.id ?? "";
     }
 
-    resolve(base64ToHex(newTxHash));
+    resolve(newTxHash);
   });
 };
 
 export const wait = async (
   address: string,
-  sendTx: () => Promise<void>,
-  successChecker: SuccessChecker = (hash: string) => true
-): Promise<WaitResult> => {
-  const transactions = await getTransactions(address);
+  sendTx: () => Promise<void>
+): Promise<string> => {
+  const { traces } = await getTraces(address);
 
-  const lastTx = transactions.at(0)?.transaction_id?.hash;
+  const lastTx = traces.at(0)?.id ?? "";
   await sendTx();
   const hash = await getNewTxHash(address, lastTx);
 
   await waitTransaction(hash);
 
-  const success = await successChecker(hash);
-
-  return { hash, success };
+  return hash;
 };

@@ -33,19 +33,16 @@ export const rewardVault = async (vaultAddress: Address) => {
   const dataUri = await uploadToIpfs(rewardsDictionary);
 
   const distributionPool = await getDistributionPool(distributionPoolAddress);
-  const { hash: distributionHash } = await wait(
-    wallet.address.toString(),
-    async () => {
-      await distributionPool.sendUpdateRewards(dedustGovernor, {
-        newRewardsRootHash: rewardsRootHash,
-        newRewardsDataUri: dataUri,
-      });
-    }
-  );
+  const distributionHash = await wait(wallet.address.toString(), async () => {
+    await distributionPool.sendUpdateRewards(dedustGovernor, {
+      newRewardsRootHash: rewardsRootHash,
+      newRewardsDataUri: dataUri,
+    });
+  });
   const { tokenWalletAddress } = await distributionPool.getPoolExtraData();
 
   const fee = toNano(0.05);
-  const { hash: sendHash } = await wait(wallet.address.toString(), async () => {
+  const sendHash = await wait(wallet.address.toString(), async () => {
     dedustGovernor.send({
       to: tokenWalletAddress,
       value: reward + fee,

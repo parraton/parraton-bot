@@ -248,7 +248,7 @@ export const claimRewardsWithLog = async (
   vaultAddress: Address
 ) => {
   const { wallet: managerWallet } = await managerWalletPromise;
-  const { hash: claimHash } = await wait(managerWallet.address.toString(), () =>
+  const claimHash = await wait(managerWallet.address.toString(), () =>
     claimRewards(distributionPoolAddress, vaultAddress)
   );
   logOperation("Claim rewards", claimHash);
@@ -256,15 +256,15 @@ export const claimRewardsWithLog = async (
 
 export const reinvestRewardsWithLog = async (vault: OpenedContract<Vault>) => {
   const { wallet: managerWallet } = await managerWalletPromise;
-  const { hash: claimHash } = await wait(managerWallet.address.toString(), () =>
+  const hash = await wait(managerWallet.address.toString(), () =>
     reinvestRewards(vault)
   );
-  logOperation("Claim rewards", claimHash);
+  logOperation("Reinvest rewards", hash);
 };
 
 export const getVaultData = memoizee(
   async (vault: OpenedContract<Vault>) => {
-    return asyncRetry(() => vault.getVaultData(), RETRY_CONFIG);
+    return asyncRetry(async () => vault.getVaultData(), RETRY_CONFIG);
   },
   {
     maxAge: 60_000,
