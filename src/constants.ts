@@ -11,7 +11,6 @@ const usdtTonVaultMainnet = "EQC7MJVHpoi46zKJOKV2XLmYM00s6ittxRFAb4J0-20iIEMX";
 const testnetVaults = [usdtTonVaultTestnet];
 const mainnetVaults = [usdtTonVaultMainnet];
 
-export const addresses = {
-  vaults: NETWORK === "testnet" ? testnetVaults : mainnetVaults,
-} as const;
-export const vaults = NETWORK === "testnet" ? testnetVaults : mainnetVaults;
+export const vaults = ["testnet", "dev", "development"].includes(NETWORK)
+  ? testnetVaults
+  : mainnetVaults;

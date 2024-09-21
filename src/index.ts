@@ -1,6 +1,6 @@
 import { schedule } from "node-cron";
 import { rewardAllVaults } from "./reward";
-import { compoundAllVaults } from "./autocompound";
+import { compoundAllVaults } from "./compound";
 
 const reinvestScenario = async (distributeRewards: boolean = false) => {
   try {
@@ -15,24 +15,23 @@ const reinvestScenario = async (distributeRewards: boolean = false) => {
 
 const reinvestWithMockDedustDistributionScenario = async () =>
   reinvestScenario(true);
-
 const reinvestOnlyScenario = async () => reinvestScenario();
 
 console.log(process.env.NETWORK);
 switch (process.env.NETWORK) {
   case "development":
   case "dev":
-    void reinvestScenario(true);
+    void reinvestScenario(false);
     break;
   case "testnet":
-    const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
-
     schedule(
-      dedustReinvestSchedule,
+      "0 0 * * *", // every day at 00:00
       reinvestWithMockDedustDistributionScenario
     );
     break;
   default:
-    const reinvestSchedule = "45 20 * * *"; // every day at 19:05
-    schedule(reinvestSchedule, reinvestOnlyScenario);
+    schedule(
+      "45 20 * * *", // every day at 19:05
+      reinvestOnlyScenario
+    );
 }

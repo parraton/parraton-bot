@@ -52,6 +52,12 @@ const isClaimRewardsNeeded = async (
     distributionPoolAddress,
     vaultAddress
   );
+  console.log(
+    "Accumulated rewards",
+    fromNano(accumulatedRewards),
+    "Claimed rewards",
+    fromNano(claimedRewards)
+  );
   return accumulatedRewards - claimedRewards > MIN_CLAIM_AMOUNT;
 };
 
@@ -69,6 +75,7 @@ export const getAmountToReinvest = memoizee(
 
 export const isReinvestRewardsNeeded = async (vault: OpenedContract<Vault>) => {
   const totalReward = await getAmountToReinvest(vault);
+  console.log("Total reward", fromNano(totalReward));
   return totalReward > MIN_REINVEST_AMOUNT;
 };
 
@@ -150,12 +157,12 @@ export const getTonToJettonSwapParams = async (
   strategy: OpenedContract<TonJettonTonStrategy>,
   tonToReinvest: bigint
 ): Promise<{ amountToSwap: bigint; swapLimit: bigint }> => {
-  const { poolAddress, jettonMasterAddress } = await strategy.getStrategyData();
+  const { poolAddress } = await strategy.getStrategyData();
   const pool = await getPool(poolAddress);
   const amountToSwap = tonToReinvest / 2n;
 
   const { amountOut } = await pool.getEstimatedSwapOut({
-    assetIn: Asset.jetton(jettonMasterAddress),
+    assetIn: Asset.native(),
     amountIn: amountToSwap,
   });
 
@@ -200,7 +207,7 @@ export const prepareTjtReinvestParams = async (
     await getTonJettonDepositParams(
       strategy,
       tonToReinvest - amountToSwap,
-      amountToSwap
+      swapLimit
     );
 
   return strategy.packReinvestData({
@@ -273,14 +280,17 @@ export const getVaultData = memoizee(
 );
 
 export const compoundVault = async (vaultAddress: Address) => {
+  console.log("Compounding vault", vaultAddress.toString());
   const vault = (await tonClient).open(Vault.createFromAddress(vaultAddress));
   const { distributionPoolAddress } = await getVaultData(vault);
 
   if (await isClaimRewardsNeeded(distributionPoolAddress, vaultAddress)) {
-    await claimRewards(distributionPoolAddress, vaultAddress);
+    console.log("Claiming rewards");
+    await claimRewardsWithLog(distributionPoolAddress, vaultAddress);
   }
   if (await isReinvestRewardsNeeded(vault)) {
-    await reinvestRewards(vault);
+    console.log("Reinvesting rewards");
+    await reinvestRewardsWithLog(vault);
   }
 };
 

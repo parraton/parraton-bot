@@ -11,7 +11,7 @@ import { RETRY_CONFIG } from "./constants";
 const pinata = new pinataSDK({ pinataJWTKey: PINATA_JWT });
 
 const fileName = "rewards.txt";
-const filePath = path.join(__dirname, "..", "assets", fileName);
+const filePath = path.join(__dirname, "assets", fileName);
 
 export const uploadToIpfs = async (dict: Dictionary<Address, bigint>) => {
   const buffer = convertDictionaryToBuffer(dict);
