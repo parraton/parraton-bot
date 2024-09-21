@@ -4,20 +4,26 @@ import { config } from "dotenv";
 console.log("Applying .env configuration");
 config();
 
+export const MANAGER_SEED_PHRASE = process.env.MANAGER_SEED_PHRASE || "";
+export const DEDUST_GOVERNOR_SEED_PHRASE =
+  process.env.DEDUST_GOVERNOR_SEED_PHRASE || "";
+
 export const TONAPI_URL = process.env.TONAPI_URL || "https://tonapi.io";
 
 export const TON_CLIENT_URL =
   process.env.TON_CLIENT_URL || "https://toncenter.com/api/v2/jsonRPC";
-
-export const DEDUST_API_URL =
-  process.env.DEDUST_API_URL || "https://api.dedust.io/v3/graphql";
 
 export const TONCENTER_API_KEY = process.env.TONCENTER_API_KEY || "";
 
 export const IPFS_GATEWAY =
   process.env.IPFS_GATEWAY || "https://gateway.pinata.cloud/ipfs/";
 
-export const NETWORK = process.env.NETWORK || "testnet";
+export const NETWORK = process.env.NETWORK || "mainnet";
+
+export const PINATA_JWT = process.env.PINATA_JWT || "";
+
+export const TONVIEWER_URL =
+  process.env.TONVIEWER_URL || "https://tonviewer.com";
 
 export const MIN_REINVEST_AMOUNT = process.env.MIN_REINVEST_AMOUNT
   ? toNano(process.env.MIN_REINVEST_AMOUNT)

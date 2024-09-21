@@ -1,129 +1,30 @@
 import { RETRY_CONFIG, vaults } from "./constants";
-import {
-  Address,
-  Builder,
-  Cell,
-  Dictionary,
-  fromNano,
-  OpenedContract,
-  toNano,
-} from "@ton/core";
+import { Address, Builder, fromNano, OpenedContract, toNano } from "@ton/core";
 import {
   JettonJettonTonStrategy,
   TonJettonTonStrategy,
   Vault,
 } from "@parraton/sdk";
 import { tonClient } from "./ton-client";
-import { DistributionAccount, DistributionPool } from "@dedust/apiary-v1";
 import memoizee from "memoizee";
 import asyncRetry from "async-retry";
 import {
-  IPFS_GATEWAY,
   JJT_REINVEST_FEE,
   MIN_CLAIM_AMOUNT,
   MIN_REINVEST_AMOUNT,
   MIN_VAULT_BALANCE,
   TJT_REINVEST_FEE,
 } from "./config";
-import { managerWalletPromise } from "./config-old/wallet";
-import { logOperation } from "./utils/log";
+import { managerWalletPromise } from "./wallet";
+import { logOperation } from "./log";
 import { wait } from "./wait";
 import { Asset, Pool } from "@dedust/sdk";
-
-export const fetchDictionaryFromIpfs = async (dataUri: string) => {
-  const response = await fetch(IPFS_GATEWAY + dataUri.replace("ipfs://", ""));
-  const merkleTreeBOC = await response.arrayBuffer();
-  const buffer = Buffer.from(merkleTreeBOC);
-  return convertBufferToDictionary(buffer);
-};
-
-const convertBufferToDictionary = (buffer: Buffer) =>
-  Cell.fromBoc(buffer)[0]
-    .beginParse()
-    .loadDictDirect(Dictionary.Keys.Address(), Dictionary.Values.BigVarUint(4));
-
-export const getDistributionPool = memoizee(
-  async (distributionPoolAddress: Address) => {
-    const rawDistributionPool = DistributionPool.createFromAddress(
-      distributionPoolAddress
-    );
-    return (await tonClient).open(rawDistributionPool);
-  },
-  {
-    maxAge: 60 * 60 * 1000, // 1 hour
-    promise: true,
-  }
-);
-
-export const getRewardsDictionary = memoizee(
-  async (distributionPoolAddress: Address) => {
-    const pool = await getDistributionPool(distributionPoolAddress);
-    const { dataUri } = await asyncRetry(
-      () => pool.getRewardsData(),
-      RETRY_CONFIG
-    );
-    if (!dataUri) {
-      return;
-    }
-    const rewardsDictionary = await fetchDictionaryFromIpfs(dataUri);
-    return rewardsDictionary;
-  },
-  {
-    maxAge: 2 * 60 * 1000, // 2 minutes
-    promise: true,
-  }
-);
-
-const getAccountActive = async (accountAddress: Address) => {
-  const {
-    last: { seqno },
-  } = await asyncRetry(
-    async () => (await tonClient).getLastBlock(),
-    RETRY_CONFIG
-  );
-
-  const { account } = await asyncRetry(
-    async () => (await tonClient).getAccountLite(seqno, accountAddress),
-    RETRY_CONFIG
-  );
-  return account.state.type === "active";
-};
-
-const getDistributionAccountClaimedRewards = async (
-  distributionPoolAddress: Address,
-  accountAddress: Address
-) => {
-  const pool = await getDistributionPool(distributionPoolAddress);
-
-  const distributionAccountAddress = await pool.getAccountAddress(
-    accountAddress
-  );
-  const rawDistributionAccount = DistributionAccount.createFromAddress(
-    distributionAccountAddress
-  );
-  const distributionAccount = (await tonClient).open(rawDistributionAccount);
-
-  if (!(await getAccountActive(distributionAccount.address))) {
-    return 0n;
-  }
-  const { totalPaid } = await asyncRetry(
-    () => distributionAccount.getAccountData(),
-    RETRY_CONFIG
-  );
-  return totalPaid;
-};
-
-const getDistributionAccountAccumulatedRewards = async (
-  distributionPoolAddress: Address,
-  accountAddress: Address
-) => {
-  const rewardsDictionary = await getRewardsDictionary(distributionPoolAddress);
-  if (!rewardsDictionary) {
-    return 0n;
-  }
-  const rewards = rewardsDictionary.get(accountAddress) ?? 0n;
-  return rewards;
-};
+import {
+  getDistributionAccountAccumulatedRewards,
+  getDistributionAccountClaimedRewards,
+  getDistributionPool,
+  getRewardsDictionary,
+} from "./distribution.utils";
 
 const getAccountTonBalance = async (accountAddress: Address) => {
   const {
@@ -361,7 +262,7 @@ export const reinvestRewardsWithLog = async (vault: OpenedContract<Vault>) => {
   logOperation("Claim rewards", claimHash);
 };
 
-const getVaultData = memoizee(
+export const getVaultData = memoizee(
   async (vault: OpenedContract<Vault>) => {
     return asyncRetry(() => vault.getVaultData(), RETRY_CONFIG);
   },
@@ -371,7 +272,7 @@ const getVaultData = memoizee(
   }
 );
 
-export const autocompoundVault = async (vaultAddress: Address) => {
+export const compoundVault = async (vaultAddress: Address) => {
   const vault = (await tonClient).open(Vault.createFromAddress(vaultAddress));
   const { distributionPoolAddress } = await getVaultData(vault);
 
@@ -383,8 +284,8 @@ export const autocompoundVault = async (vaultAddress: Address) => {
   }
 };
 
-export const autocompoundAllVaults = async () => {
+export const compoundAllVaults = async () => {
   for (const vault of vaults) {
-    await autocompoundVault(Address.parse(vault));
+    await compoundVault(Address.parse(vault));
   }
 };

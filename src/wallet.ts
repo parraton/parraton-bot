@@ -1,8 +1,8 @@
 import { WalletContractV4 } from "@ton/ton";
 import { mnemonicToWalletKey } from "@ton/crypto";
-import { environment } from "./environment";
 import { OpenedContract, Sender } from "@ton/core";
-import { tonClientPromise } from "./ton-client";
+import { tonClient } from "./ton-client";
+import { DEDUST_GOVERNOR_SEED_PHRASE, MANAGER_SEED_PHRASE } from "./config";
 
 export interface WalletSender {
   wallet: OpenedContract<WalletContractV4>;
@@ -11,11 +11,9 @@ export interface WalletSender {
 
 const getWallet = async (mnemonic: string): Promise<WalletSender> => {
   const mnemonicArray = mnemonic.split(" ");
-
   const keys = await mnemonicToWalletKey(mnemonicArray);
-  const tonClient = await tonClientPromise;
 
-  const wallet = tonClient.open(
+  const wallet = (await tonClient).open(
     WalletContractV4.create({
       workchain: 0,
       publicKey: keys.publicKey,
@@ -28,7 +26,7 @@ const getWallet = async (mnemonic: string): Promise<WalletSender> => {
   };
 };
 
-export const managerWalletPromise = getWallet(environment.MANAGER_SEED_PHRASE);
+export const managerWalletPromise = getWallet(MANAGER_SEED_PHRASE);
 export const dedustGovernorWalletPromise = getWallet(
-  environment.DEDUST_GOVERNOR_SEED_PHRASE
+  DEDUST_GOVERNOR_SEED_PHRASE
 );

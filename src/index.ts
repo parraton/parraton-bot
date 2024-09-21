@@ -1,13 +1,13 @@
 import { schedule } from "node-cron";
-import { mockDedustDistribution } from "./mock-dedust-distribution";
-import { sendReinvest } from "./send-reinvest";
+import { rewardAllVaults } from "./reward";
+import { compoundAllVaults } from "./autocompound";
 
 const reinvestScenario = async (distributeRewards: boolean = false) => {
   try {
     if (distributeRewards) {
-      await mockDedustDistribution();
+      await rewardAllVaults();
     }
-    await sendReinvest();
+    await compoundAllVaults();
   } catch (e) {
     console.error(e);
   }
@@ -26,7 +26,6 @@ switch (process.env.NETWORK) {
     break;
   case "testnet":
     const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
-    const vaultExtraRewardsDistributionSchedule = "0 1 * * *"; // every day at 01:00
 
     schedule(
       dedustReinvestSchedule,
