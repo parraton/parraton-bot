@@ -61,7 +61,7 @@ const isClaimRewardsNeeded = async (
   return accumulatedRewards - claimedRewards > MIN_CLAIM_AMOUNT;
 };
 
-export const getAmountToReinvest = memoizee(
+const getAmountToReinvest = memoizee(
   async (vault: OpenedContract<Vault>) => {
     const vaultBalance = await getAccountTonBalance(vault.address);
     const { managementFee } = await getVaultData(vault);
@@ -73,13 +73,13 @@ export const getAmountToReinvest = memoizee(
   }
 );
 
-export const isReinvestRewardsNeeded = async (vault: OpenedContract<Vault>) => {
+const isReinvestRewardsNeeded = async (vault: OpenedContract<Vault>) => {
   const totalReward = await getAmountToReinvest(vault);
   console.log("Total reward", fromNano(totalReward));
   return totalReward > MIN_REINVEST_AMOUNT;
 };
 
-export const claimRewards = async (
+const claimRewards = async (
   distributionPoolAddress: Address,
   vaultAddress: Address
 ) => {
@@ -89,9 +89,11 @@ export const claimRewards = async (
   }
   const proof = rewardsDictionary.generateMerkleProof([vaultAddress]);
   const distributionPool = await getDistributionPool(distributionPoolAddress);
-  const { sender: manager } = await managerWalletPromise;
+  const { sender: manager, wallet } = await managerWalletPromise;
 
-  // TODO: check if balance is enough
+  if (!(await isBalanceEnough(wallet.address, toNano(0.2)))) {
+    return;
+  }
 
   await distributionPool.sendClaim(manager, {
     userAddress: vaultAddress,
@@ -104,7 +106,7 @@ export enum PoolType {
   JETTON_JETTON,
 }
 
-export const getPool = memoizee(
+const getPool = memoizee(
   async (poolAddress: Address) => {
     const rawPool = Pool.createFromAddress(poolAddress);
     const pool = await (await tonClient).open(rawPool);
@@ -124,7 +126,7 @@ export async function getPoolType(poolAddress: Address) {
     : PoolType.TON_JETTON;
 }
 
-export async function getStrategy(strategyAddress: Address) {
+async function getStrategy(strategyAddress: Address) {
   const rawStrategy = TonJettonTonStrategy.createFromAddress(strategyAddress);
   const strategy = await (await tonClient).open(rawStrategy);
 
@@ -147,13 +149,13 @@ export async function getStrategy(strategyAddress: Address) {
   };
 }
 
-export const getReinvestFee = (poolType: PoolType) => {
+const getReinvestFee = (poolType: PoolType) => {
   return poolType === PoolType.JETTON_JETTON
     ? JJT_REINVEST_FEE
     : TJT_REINVEST_FEE;
 };
 
-export const getTonToJettonSwapParams = async (
+const getTonToJettonSwapParams = async (
   poolAddress: Address,
   tonToReinvest: bigint
 ): Promise<{ amountToSwap: bigint; swapLimit: bigint }> => {
@@ -167,7 +169,8 @@ export const getTonToJettonSwapParams = async (
 
   return { amountToSwap, swapLimit: (amountOut * 9n) / 10n };
 };
-export const getUsdtToJettonSwapParams = async (
+
+const getUsdtToJettonSwapParams = async (
   poolAddress: Address,
   usdtAddress: Address,
   usdtBalance: bigint
@@ -183,7 +186,7 @@ export const getUsdtToJettonSwapParams = async (
   return { amountToSwap, swapLimit: (amountOut * 9n) / 10n };
 };
 
-export const getTonJettonDepositParams = async (
+const getTonJettonDepositParams = async (
   strategy: OpenedContract<TonJettonTonStrategy>,
   tonToInvest: bigint,
   jettonToInvest: bigint
@@ -207,7 +210,7 @@ export const getTonJettonDepositParams = async (
   };
 };
 
-export const getUsdtJettonDepositParams = async (
+const getUsdtJettonDepositParams = async (
   strategy: OpenedContract<JettonJettonTonStrategy>,
   usdtToInvest: bigint,
   jettonToInvest: bigint
@@ -234,7 +237,7 @@ export const getUsdtJettonDepositParams = async (
   };
 };
 
-export const prepareTjtReinvestParams = async (
+const prepareTjtReinvestParams = async (
   strategyAddress: Address,
   tonToReinvest: bigint
 ) => {
@@ -265,7 +268,7 @@ export const prepareTjtReinvestParams = async (
   });
 };
 
-export const prepareJjtReinvestParams = async (
+const prepareJjtReinvestParams = async (
   strategyAddress: Address,
   tonToReinvest: bigint
 ) => {
@@ -305,8 +308,21 @@ export const prepareJjtReinvestParams = async (
   });
 };
 
-export const reinvestRewards = async (vault: OpenedContract<Vault>) => {
-  const { sender: manager } = await managerWalletPromise;
+export const isBalanceEnough = async (userAddress: Address, value: bigint) => {
+  const balance = await getAccountTonBalance(userAddress);
+  console.log(
+    "Address",
+    userAddress.toString(),
+    "Balance",
+    fromNano(balance),
+    "Value",
+    fromNano(value)
+  );
+  return balance >= value;
+};
+
+const reinvestRewards = async (vault: OpenedContract<Vault>) => {
+  const { sender: manager, wallet } = await managerWalletPromise;
   const { strategyAddress } = await getVaultData(vault);
   const totalReward = await getAmountToReinvest(vault);
   const { poolType } = await getStrategy(strategyAddress);
@@ -328,11 +344,13 @@ export const reinvestRewards = async (vault: OpenedContract<Vault>) => {
       break;
   }
 
-  // TODO: check if balance is enough
+  if (!(await isBalanceEnough(wallet.address, value))) {
+    return;
+  }
   await vault.sendReinvest(manager, { value, totalReward, strategyBuilder });
 };
 
-export const claimRewardsWithLog = async (
+const claimRewardsWithLog = async (
   distributionPoolAddress: Address,
   vaultAddress: Address
 ) => {
@@ -343,7 +361,7 @@ export const claimRewardsWithLog = async (
   logOperation("Claim rewards", claimHash);
 };
 
-export const reinvestRewardsWithLog = async (vault: OpenedContract<Vault>) => {
+const reinvestRewardsWithLog = async (vault: OpenedContract<Vault>) => {
   const { wallet: managerWallet } = await managerWalletPromise;
   const hash = await wait(managerWallet.address.toString(), () =>
     reinvestRewards(vault)
@@ -361,7 +379,7 @@ export const getVaultData = memoizee(
   }
 );
 
-export const compoundVault = async (vaultAddress: Address) => {
+const compoundVault = async (vaultAddress: Address) => {
   console.log("Compounding vault", vaultAddress.toString());
   const vault = (await tonClient).open(Vault.createFromAddress(vaultAddress));
   const { distributionPoolAddress } = await getVaultData(vault);

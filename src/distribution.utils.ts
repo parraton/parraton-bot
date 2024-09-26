@@ -1,5 +1,5 @@
 import { RETRY_CONFIG } from "./constants";
-import { Address, Cell, Dictionary } from "@ton/core";
+import { Address } from "@ton/core";
 import { tonClient } from "./ton-client";
 import { DistributionAccount, DistributionPool } from "@dedust/apiary-v1";
 import memoizee from "memoizee";

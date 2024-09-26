@@ -8,7 +8,14 @@ export const RETRY_CONFIG = {
 
 const usdtTonVaultTestnet = "EQCczQbuj2Z5tLLt4mYb-kVgt52A9kXbkVFWSuToexwbajV_";
 const usdtTonVaultMainnet = "EQC7MJVHpoi46zKJOKV2XLmYM00s6ittxRFAb4J0-20iIEMX";
-const testnetVaults = [usdtTonVaultTestnet];
+
+const stTonUsdtVaultTestnet =
+  "EQAenYehuHOyOL-M2SWeSXQ9cpKbgVDC8tB8hinCjk5hPLm0";
+const stTonUsdtVaultMainnet =
+  "EQC1vwHI1R3_iaV1MhKS3OsLnPlvv7Wm98PBptTbPAyKq9YA";
+const tsTonUsdtVaultMainnet =
+  "EQArPB-JUA0hJ8l_RXeFmaN0W0jetNj9ItbzRgra2axxM5TQ";
+const testnetVaults = [stTonUsdtVaultTestnet];
 const mainnetVaults = [usdtTonVaultMainnet];
 
 export const vaults = ["testnet", "dev", "development"].includes(NETWORK)
