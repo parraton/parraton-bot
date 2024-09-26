@@ -91,8 +91,3 @@ Contributions are welcome! Please follow the established code style and conventi
 This project is licensed under the MIT license.
 
 See [LICENSE](LICENSE) for more information.
-
-<p align="center"> Made with 💙💛 by <a href=https://mad.fish/>mad.fish</a>
-<br />
-<img src="docs/images/logo_big.svg" alt="Logo" height="200">
-</p>

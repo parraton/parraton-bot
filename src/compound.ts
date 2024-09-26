@@ -154,15 +154,29 @@ export const getReinvestFee = (poolType: PoolType) => {
 };
 
 export const getTonToJettonSwapParams = async (
-  strategy: OpenedContract<TonJettonTonStrategy>,
+  poolAddress: Address,
   tonToReinvest: bigint
 ): Promise<{ amountToSwap: bigint; swapLimit: bigint }> => {
-  const { poolAddress } = await strategy.getStrategyData();
   const pool = await getPool(poolAddress);
   const amountToSwap = tonToReinvest / 2n;
 
   const { amountOut } = await pool.getEstimatedSwapOut({
     assetIn: Asset.native(),
+    amountIn: amountToSwap,
+  });
+
+  return { amountToSwap, swapLimit: (amountOut * 9n) / 10n };
+};
+export const getUsdtToJettonSwapParams = async (
+  poolAddress: Address,
+  usdtAddress: Address,
+  usdtBalance: bigint
+): Promise<{ amountToSwap: bigint; swapLimit: bigint }> => {
+  const pool = await getPool(poolAddress);
+  const amountToSwap = usdtBalance / 2n;
+
+  const { amountOut } = await pool.getEstimatedSwapOut({
+    assetIn: Asset.jetton(usdtAddress),
     amountIn: amountToSwap,
   });
 
@@ -193,14 +207,42 @@ export const getTonJettonDepositParams = async (
   };
 };
 
+export const getUsdtJettonDepositParams = async (
+  strategy: OpenedContract<JettonJettonTonStrategy>,
+  usdtToInvest: bigint,
+  jettonToInvest: bigint
+): Promise<{
+  usdtTargetBalance: bigint;
+  jettonTargetBalance: bigint;
+  depositLimit: bigint;
+}> => {
+  const { poolAddress, usdtMasterAddress } = await strategy.getStrategyData();
+  const pool = await getPool(poolAddress);
+  const assets = await pool.getAssets();
+  const isUsdtFirst = assets[0].address === usdtMasterAddress;
+
+  const { deposits, fairSupply } = await pool.getEstimateDepositOut(
+    isUsdtFirst
+      ? [usdtToInvest, jettonToInvest]
+      : [jettonToInvest, usdtToInvest]
+  );
+
+  return {
+    usdtTargetBalance: isUsdtFirst ? deposits[0] : deposits[1],
+    jettonTargetBalance: isUsdtFirst ? deposits[1] : deposits[0],
+    depositLimit: (fairSupply * 9n) / 10n,
+  };
+};
+
 export const prepareTjtReinvestParams = async (
   strategyAddress: Address,
   tonToReinvest: bigint
 ) => {
   const rawStrategy = TonJettonTonStrategy.createFromAddress(strategyAddress);
   const strategy = await (await tonClient).open(rawStrategy);
+  const { poolAddress } = await strategy.getStrategyData();
   const { amountToSwap, swapLimit } = await getTonToJettonSwapParams(
-    strategy,
+    poolAddress,
     tonToReinvest
   );
   const { tonTargetBalance, jettonTargetBalance, depositLimit } =
@@ -223,6 +265,46 @@ export const prepareTjtReinvestParams = async (
   });
 };
 
+export const prepareJjtReinvestParams = async (
+  strategyAddress: Address,
+  tonToReinvest: bigint
+) => {
+  const rawStrategy =
+    JettonJettonTonStrategy.createFromAddress(strategyAddress);
+  const strategy = await (await tonClient).open(rawStrategy);
+  const { usdtTonPoolAddress, poolAddress, usdtMasterAddress } =
+    await strategy.getStrategyData();
+  const { amountToSwap: amountToSwap0, swapLimit: swap0Limit } =
+    await getTonToJettonSwapParams(usdtTonPoolAddress, tonToReinvest);
+  const { amountToSwap: amountToSwap1, swapLimit: swap1Limit } =
+    await getUsdtToJettonSwapParams(
+      poolAddress,
+      usdtMasterAddress,
+      swap0Limit // jetton amount to swap
+    );
+  const { usdtTargetBalance, jettonTargetBalance, depositLimit } =
+    await getUsdtJettonDepositParams(
+      strategy,
+      swap0Limit - amountToSwap1,
+      swap1Limit
+    );
+
+  return strategy.packReinvestData({
+    amountToSwap0,
+    amountToSwap1,
+    swap0Limit,
+    swap1Limit,
+    depositLimit,
+    usdtTargetBalance,
+    jettonTargetBalance,
+    swapFwdFee: toNano(0.3),
+    depositFee: toNano(0.45),
+    depositFwdFee: toNano(0.4),
+    transferFee: toNano(0.05),
+    deadline: Math.floor(Date.now() / 1000 + 86400),
+  });
+};
+
 export const reinvestRewards = async (vault: OpenedContract<Vault>) => {
   const { sender: manager } = await managerWalletPromise;
   const { strategyAddress } = await getVaultData(vault);
@@ -239,7 +321,7 @@ export const reinvestRewards = async (vault: OpenedContract<Vault>) => {
       );
       break;
     case PoolType.JETTON_JETTON:
-      strategyBuilder = await prepareTjtReinvestParams(
+      strategyBuilder = await prepareJjtReinvestParams(
         strategyAddress,
         totalReward
       );

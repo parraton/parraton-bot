@@ -21,7 +21,7 @@ console.log(process.env.NETWORK);
 switch (process.env.NETWORK) {
   case "development":
   case "dev":
-    void reinvestScenario(false);
+    void reinvestScenario(true);
     break;
   case "testnet":
     schedule(
