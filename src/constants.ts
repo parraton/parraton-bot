@@ -15,8 +15,12 @@ const stTonUsdtVaultMainnet =
   "EQC1vwHI1R3_iaV1MhKS3OsLnPlvv7Wm98PBptTbPAyKq9YA";
 const tsTonUsdtVaultMainnet =
   "EQArPB-JUA0hJ8l_RXeFmaN0W0jetNj9ItbzRgra2axxM5TQ";
-const testnetVaults = [stTonUsdtVaultTestnet];
-const mainnetVaults = [usdtTonVaultMainnet];
+const testnetVaults = [usdtTonVaultTestnet, stTonUsdtVaultTestnet];
+const mainnetVaults = [
+  usdtTonVaultMainnet,
+  stTonUsdtVaultMainnet,
+  tsTonUsdtVaultMainnet,
+];
 
 export const vaults = ["testnet", "dev", "development"].includes(NETWORK)
   ? testnetVaults

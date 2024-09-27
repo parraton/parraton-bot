@@ -65,7 +65,8 @@ const getAmountToReinvest = memoizee(
   async (vault: OpenedContract<Vault>) => {
     const vaultBalance = await getAccountTonBalance(vault.address);
     const { managementFee } = await getVaultData(vault);
-    return vaultBalance - MIN_VAULT_BALANCE - managementFee;
+    const storageFee = toNano(0.1);
+    return vaultBalance - MIN_VAULT_BALANCE - managementFee - storageFee;
   },
   {
     maxAge: 60_000,
@@ -92,6 +93,7 @@ const claimRewards = async (
   const { sender: manager, wallet } = await managerWalletPromise;
 
   if (!(await isBalanceEnough(wallet.address, toNano(0.2)))) {
+    console.log("Not enough balance to claim rewards");
     return;
   }
 

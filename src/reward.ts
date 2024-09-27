@@ -31,7 +31,6 @@ export const rewardVault = async (vaultAddress: Address) => {
 
   const distributionPool = await getDistributionPool(distributionPoolAddress);
   const { tokenWalletAddress } = await distributionPool.getPoolExtraData();
-  console.log(tokenWalletAddress);
 
   const fee = toNano(0.05);
   if (!(await isBalanceEnough(wallet.address, reward + fee))) {
