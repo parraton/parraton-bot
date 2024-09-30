@@ -25,3 +25,5 @@ const mainnetVaults = [
 export const vaults = ["testnet", "dev", "development"].includes(NETWORK)
   ? testnetVaults
   : mainnetVaults;
+
+export const MANAGEMENT_FEE_DIVIDER = 10000n;

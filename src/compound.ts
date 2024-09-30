@@ -1,4 +1,4 @@
-import { RETRY_CONFIG, vaults } from "./constants";
+import { MANAGEMENT_FEE_DIVIDER, RETRY_CONFIG, vaults } from "./constants";
 import { Address, Builder, fromNano, OpenedContract, toNano } from "@ton/core";
 import {
   JettonJettonTonStrategy,
@@ -64,9 +64,12 @@ const isClaimRewardsNeeded = async (
 const getAmountToReinvest = memoizee(
   async (vault: OpenedContract<Vault>) => {
     const vaultBalance = await getAccountTonBalance(vault.address);
-    const { managementFee } = await getVaultData(vault);
-    const storageFee = toNano(0.1);
-    return vaultBalance - MIN_VAULT_BALANCE - managementFee - storageFee;
+    const { managementFee, managementFeeRate } = await getVaultData(vault);
+    return (
+      ((vaultBalance - MIN_VAULT_BALANCE - managementFee) *
+        (MANAGEMENT_FEE_DIVIDER - managementFeeRate)) /
+      MANAGEMENT_FEE_DIVIDER
+    );
   },
   {
     maxAge: 60_000,
