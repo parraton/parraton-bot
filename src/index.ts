@@ -1,52 +1,36 @@
 import { schedule } from "node-cron";
-
-import { mockDedustDistribution } from "./mock-dedust-distribution";
-
-import { sendReinvest } from "./send-reinvest";
-import { vaultExtraRewardsDistribution } from "./vault-extra-rewards-distribution";
+import { rewardAllVaults } from "./reward";
+import { compoundAllVaults } from "./compound";
 
 const reinvestScenario = async (distributeRewards: boolean = false) => {
   try {
     if (distributeRewards) {
-      await mockDedustDistribution();
+      await rewardAllVaults();
     }
-    console.log("reinvestScenario");
-    await sendReinvest();
+    await compoundAllVaults();
   } catch (e) {
     console.error(e);
   }
 };
 
-const reinvestWithMockDedustDistributionScenario = async () =>
-  reinvestScenario(true);
-
-const reinvestOnlyScenario = async () => reinvestScenario();
-
-const extraRewardsScenario = async () => {
-  try {
-    await vaultExtraRewardsDistribution();
-  } catch (e) {
-    console.error(e);
-  }
-};
+const reinvestWithMockDistribution = async () => reinvestScenario(true);
+const reinvestOnly = async () => reinvestScenario();
 
 console.log(process.env.NETWORK);
 switch (process.env.NETWORK) {
   case "development":
   case "dev":
-    void reinvestScenario(true);
+    void reinvestScenario(false);
     break;
   case "testnet":
-    const dedustReinvestSchedule = "0 0 * * *"; // every day at 00:00
-    const vaultExtraRewardsDistributionSchedule = "0 1 * * *"; // every day at 01:00
-
     schedule(
-      dedustReinvestSchedule,
-      reinvestWithMockDedustDistributionScenario
+      "0 0 * * *", // every day at 00:00
+      reinvestWithMockDistribution
     );
-    schedule(vaultExtraRewardsDistributionSchedule, extraRewardsScenario);
     break;
   default:
-    const reinvestSchedule = "45 20 * * *"; // every day at 19:05
-    schedule(reinvestSchedule, reinvestOnlyScenario);
+    schedule(
+      "19 20 * * *", // every day at 20:19
+      reinvestOnly
+    );
 }
