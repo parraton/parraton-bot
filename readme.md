@@ -1,12 +1,12 @@
-# Parroton Restaker
+# Parraton Restaker
 
-Parroton is a decentralized, permission-less, open-source yield optimization protocol on TON blockchain. Visit [parroton.org](https://parroton.org) for more information.
+Parraton is a decentralized, permission-less, open-source yield optimization protocol on TON blockchain. Visit [parraton.org](https://parraton.org) for more information.
 
-Parroton consists of these components:
+Parraton consists of these components:
 
-**[Contract](https://github.com/KStasi/parroton-core)**: The smart contract code that is running on-chain.
+**[Contract](https://github.com/parraton/parraton-core)**: The smart contract code that is running on-chain.
 
-**[Webapp](https://github.com/Digberi/parroton-web)**: The web application that helps users with deposits and withdrawals.
+**[Webapp](https://github.com/parraton/parroton-web)**: The web application that helps users with deposits and withdrawals.
 
 **Restaker**: The off-chain bot that restakes rewards to generate more yield for depositors. The code is available here on this repository.
 
@@ -25,7 +25,7 @@ Parroton consists of these components:
 
 ## Overview
 
-Parroton Bot handles the automation of reward distributions and other operational tasks for the Parroton platform. It integrates with several services, including DeDust and the TON blockchain, to perform its functions.
+Parraton Bot handles the automation of reward distributions and other operational tasks for the Parraton platform. It integrates with several services, including DeDust and the TON blockchain, to perform its functions.
 
 ## Getting Started
 
@@ -41,13 +41,13 @@ Ensure you have the following installed on your local development machine:
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/digberi/parroton-bot.git
+   git clone https://github.com/parraton/parraton-bot.git
    ```
 
 2. Navigate to the project directory:
 
    ```sh
-   cd parroton-bot
+   cd parraton-bot
    ```
 
 3. Install the dependencies:
@@ -74,7 +74,7 @@ pnpm start
 
 ## Dependencies
 
-Parroton Bot uses a variety of dependencies to integrate with DeDust, TON blockchain, and other services. Key dependencies include:
+Parraton Bot uses a variety of dependencies to integrate with DeDust, TON blockchain, and other services. Key dependencies include:
 
 - DeDust SDK
 - TON blockchain libraries

@@ -1,6 +1,6 @@
 {
-  "name": "parroton-bot",
-  "description": "Distribution bot for Parroton",
+  "name": "parraton-bot",
+  "description": "Distribution bot for Parraton",
   "version": "1.0.0",
   "scripts": {
     "start": "ts-node src/index.ts",
