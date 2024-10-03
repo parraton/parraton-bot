@@ -19,7 +19,7 @@ export const PINATA_JWT = process.env.PINATA_JWT || "";
 
 export const MIN_REINVEST_AMOUNT = process.env.MIN_REINVEST_AMOUNT
   ? toNano(process.env.MIN_REINVEST_AMOUNT)
-  : toNano(7);
+  : toNano(6);
 export const MIN_CLAIM_AMOUNT = process.env.MIN_CLAIM_AMOUNT
   ? toNano(process.env.MIN_CLAIM_AMOUNT)
   : toNano(7);
