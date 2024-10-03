@@ -30,7 +30,7 @@ switch (process.env.NETWORK) {
     break;
   default:
     schedule(
-      "30 12 * * *", // every day at 12:30
+      "25 13 * * *", // every day at 13:25
       reinvestOnly
     );
 }
