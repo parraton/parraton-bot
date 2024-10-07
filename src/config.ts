@@ -22,7 +22,7 @@ export const MIN_REINVEST_AMOUNT = process.env.MIN_REINVEST_AMOUNT
   : toNano(6);
 export const MIN_CLAIM_AMOUNT = process.env.MIN_CLAIM_AMOUNT
   ? toNano(process.env.MIN_CLAIM_AMOUNT)
-  : toNano(7);
+  : toNano(6.5);
 export const MIN_VAULT_BALANCE = process.env.MIN_VAULT_BALANCE
   ? toNano(process.env.MIN_VAULT_BALANCE)
   : toNano(1);
