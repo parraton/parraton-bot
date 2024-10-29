@@ -12,6 +12,7 @@ import {
   JJT_REINVEST_FEE,
   MIN_CLAIM_AMOUNT,
   MIN_REINVEST_AMOUNT,
+  MIN_USDT_DEPOSIT_AMOUNT,
   MIN_VAULT_BALANCE,
   TJT_REINVEST_FEE,
 } from "./config";
@@ -25,6 +26,7 @@ import {
   getDistributionPool,
   getRewardsDictionary,
 } from "./distribution.utils";
+import { tonApiClient } from "./ton-api";
 
 const getAccountTonBalance = async (accountAddress: Address) => {
   const {
@@ -82,6 +84,51 @@ const isReinvestRewardsNeeded = async (vault: OpenedContract<Vault>) => {
   console.log("Total reward", fromNano(totalReward));
   return totalReward > MIN_REINVEST_AMOUNT;
 };
+
+const isCompleteReinvestNeeded = async (vault: OpenedContract<Vault>) => {
+  const { strategyAddress } = await getVaultData(vault);
+  const { strategy, poolType } = await getStrategy(strategyAddress);
+  if (poolType !== PoolType.JETTON_JETTON) {
+    return false;
+  }
+  const { usdtBalance } = await getJjtStrategyBalances(
+    strategy as OpenedContract<JettonJettonTonStrategy>
+  );
+  console.log("Usdt balance", usdtBalance);
+  return usdtBalance > MIN_USDT_DEPOSIT_AMOUNT;
+};
+
+const getAccountJettonBalance = async (
+  accountAddress: Address,
+  jettonAddress: Address
+) => {
+  const jettonBalance = await tonApiClient.accounts.getAccountJettonBalance(
+    accountAddress.toString(),
+    jettonAddress.toString()
+  );
+  return BigInt(jettonBalance.balance);
+};
+
+const getJjtStrategyBalances = memoizee(
+  async (strategy: OpenedContract<JettonJettonTonStrategy>) => {
+    const { usdtMasterAddress, jettonMasterAddress } =
+      await strategy.getStrategyData();
+    return {
+      usdtBalance: await getAccountJettonBalance(
+        strategy.address,
+        usdtMasterAddress
+      ),
+      jettonBalance: await getAccountJettonBalance(
+        strategy.address,
+        jettonMasterAddress
+      ),
+    };
+  },
+  {
+    maxAge: 60_000,
+    promise: true,
+  }
+);
 
 const claimRewards = async (
   distributionPoolAddress: Address,
@@ -227,7 +274,7 @@ const getUsdtJettonDepositParams = async (
   const { poolAddress, usdtMasterAddress } = await strategy.getStrategyData();
   const pool = await getPool(poolAddress);
   const assets = await pool.getAssets();
-  const isUsdtFirst = assets[0].address === usdtMasterAddress;
+  const isUsdtFirst = assets[0].address?.equals(usdtMasterAddress) ?? false;
 
   const { deposits, fairSupply } = await pool.getEstimateDepositOut(
     isUsdtFirst
@@ -238,7 +285,7 @@ const getUsdtJettonDepositParams = async (
   return {
     usdtTargetBalance: isUsdtFirst ? deposits[0] : deposits[1],
     jettonTargetBalance: isUsdtFirst ? deposits[1] : deposits[0],
-    depositLimit: (fairSupply * 9n) / 10n,
+    depositLimit: (fairSupply * 3n) / 10n,
   };
 };
 
@@ -313,6 +360,31 @@ const prepareJjtReinvestParams = async (
   });
 };
 
+const prepareJjtReinvestDepositParams = async (strategyAddress: Address) => {
+  const rawStrategy =
+    JettonJettonTonStrategy.createFromAddress(strategyAddress);
+  const strategy = await (await tonClient).open(rawStrategy);
+
+  const { usdtBalance, jettonBalance } = await getJjtStrategyBalances(strategy);
+  const { usdtTargetBalance, jettonTargetBalance, depositLimit } =
+    await getUsdtJettonDepositParams(strategy, usdtBalance, jettonBalance);
+
+  return strategy.packReinvestData({
+    amountToSwap0: 0n,
+    amountToSwap1: 0n,
+    swap0Limit: 0n,
+    swap1Limit: 0n,
+    depositLimit,
+    usdtTargetBalance,
+    jettonTargetBalance,
+    swapFwdFee: toNano(0.3),
+    depositFee: toNano(0.45),
+    depositFwdFee: toNano(0.4),
+    transferFee: toNano(0.05),
+    deadline: Math.floor(Date.now() / 1000 + 86400),
+  });
+};
+
 export const isBalanceEnough = async (userAddress: Address, value: bigint) => {
   const balance = await getAccountTonBalance(userAddress);
   console.log(
@@ -355,6 +427,31 @@ const reinvestRewards = async (vault: OpenedContract<Vault>) => {
   await vault.sendReinvest(manager, { value, totalReward, strategyBuilder });
 };
 
+const completeReinvest = async (vault: OpenedContract<Vault>) => {
+  const { sender: manager, wallet } = await managerWalletPromise;
+  const { strategyAddress } = await getVaultData(vault);
+  const { poolType } = await getStrategy(strategyAddress);
+  const value = getReinvestFee(poolType);
+
+  let strategyBuilder: Builder;
+  switch (poolType) {
+    case PoolType.TON_JETTON:
+      return;
+    case PoolType.JETTON_JETTON:
+      strategyBuilder = await prepareJjtReinvestDepositParams(strategyAddress);
+      break;
+  }
+
+  if (!(await isBalanceEnough(wallet.address, value))) {
+    return;
+  }
+  await vault.sendReinvest(manager, {
+    value,
+    totalReward: 0n,
+    strategyBuilder,
+  });
+};
+
 const claimRewardsWithLog = async (
   distributionPoolAddress: Address,
   vaultAddress: Address
@@ -372,6 +469,14 @@ const reinvestRewardsWithLog = async (vault: OpenedContract<Vault>) => {
     reinvestRewards(vault)
   );
   logOperation("Reinvest rewards", hash);
+};
+
+const completeReinvestWithLog = async (vault: OpenedContract<Vault>) => {
+  const { wallet: managerWallet } = await managerWalletPromise;
+  const hash = await wait(managerWallet.address.toString(), () =>
+    completeReinvest(vault)
+  );
+  logOperation("Complete reinvest", hash);
 };
 
 export const getVaultData = memoizee(
@@ -399,8 +504,24 @@ const compoundVault = async (vaultAddress: Address) => {
   }
 };
 
+const completeCompound = async (vaultAddress: Address) => {
+  console.log("Compounding vault", vaultAddress.toString());
+  const vault = (await tonClient).open(Vault.createFromAddress(vaultAddress));
+
+  if (await isCompleteReinvestNeeded(vault)) {
+    console.log("Completing reinvest");
+    await completeReinvestWithLog(vault);
+  }
+};
+
 export const compoundAllVaults = async () => {
   for (const vault of vaults) {
     await compoundVault(Address.parse(vault));
+  }
+};
+
+export const completeAllVaults = async () => {
+  for (const vault of vaults) {
+    await completeCompound(Address.parse(vault));
   }
 };

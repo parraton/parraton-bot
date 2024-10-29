@@ -32,3 +32,6 @@ export const JJT_REINVEST_FEE = process.env.JJT_REINVEST_FEE
 export const TJT_REINVEST_FEE = process.env.TJT_REINVEST_FEE
   ? toNano(process.env.TJT_REINVEST_FEE)
   : toNano(0.7);
+export const MIN_USDT_DEPOSIT_AMOUNT = process.env.MIN_USDT_DEPOSIT_AMOUNT
+  ? toNano(process.env.MIN_USDT_DEPOSIT_AMOUNT)
+  : 50_000_000n;
